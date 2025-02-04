@@ -1,0 +1,54 @@
+/* Contenedor principal del formulario */
+.formulario-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;  /* El formulario tendrá un ancho máximo de 600px */
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave para darle un efecto de profundidad */
+    border-radius: 8px;
+    text-align: center;
+  }
+  
+  /* Estilo para los grupos de entrada */
+  .input-group {
+    width: 100%;
+    margin-bottom: 15px;
+  }
+  
+  /* Estilo para las etiquetas de los campos */
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  
+  /* Estilo para los campos de entrada */
+  input {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0 10px 0;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+  
+  /* Estilo para el botón de envío */
+  button {
+    width: 100%;
+    padding: 12px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
