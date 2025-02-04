@@ -1,18 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UsuarioController;
+use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
+// Rutas para CSRF
+Route::get('sanctum/csrf-cookie', [CsrfCookieController::class, 'show'])->name('csrf-cookie');
 
-Route::get('/', function () {
-    return view('welcome');
+// Rutas del registro bajo el middleware 'web'
+Route::middleware('web')->group(function () {
+    Route::get('register', [UsuarioController::class, 'showForm'])->name('register.form');
+    Route::post('register', [UsuarioController::class, 'store'])->name('register.store');
 });
