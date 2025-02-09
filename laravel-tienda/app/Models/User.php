@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -13,18 +12,20 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
+     * Los atributos que se pueden asignar masivamente.
      *
      * @var array<int, string>
      */
     protected $fillable = [
         'name',
+        'last_name',  // Agregar el campo 'last_name'
         'email',
         'password',
+        'address',    // Agregar el campo 'address'
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
+     * Los atributos que deberían ser ocultos para la serialización.
      *
      * @var array<int, string>
      */
@@ -34,11 +35,24 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be cast.
+     * Los atributos que deberían ser convertidos a otro tipo.
      *
      * @var array<string, string>
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Establecer la relación con la contraseña encriptada.
+     * Esto no es necesario si usas bcrypt() al crear el usuario, pero
+     * es una buena práctica tenerlo aquí por si se necesita algo más.
+     *
+     * @param string $password
+     * @return void
+     */
+    public function setPasswordAttribute($password)
+    {
+        $this->attributes['password'] = bcrypt($password);
+    }
 }

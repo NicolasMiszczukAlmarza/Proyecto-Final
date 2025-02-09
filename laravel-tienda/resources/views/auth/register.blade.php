@@ -1,46 +1,29 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro</title>
-</head>
-<body>
-    <h2>Formulario de Registro</h2>
-    <form action="{{ route('register.store') }}" method="POST">
+@extends('layouts.app')
+
+@section('content')
+<div class="container">
+    <h2>Registro de Usuario</h2>
+    <form method="POST" action="{{ route('register.store') }}"> <!-- Cambio en la acción -->
         @csrf
-        
-        <div>
-            <label for="name">Nombre:</label>
-            <input type="text" id="name" name="name" required>
-        </div>
+        <label for="name">Nombre:</label>
+        <input type="text" name="name" required>
 
-        <div>
-            <label for="lastName">Apellidos:</label>
-            <input type="text" id="lastName" name="lastName" required>
-        </div>
+        <label for="last_name">Apellido:</label>
+        <input type="text" name="last_name" required>
 
-        <div>
-            <label for="address">Dirección:</label>
-            <input type="text" id="address" name="address" required>
-        </div>
+        <label for="email">Correo Electrónico:</label>
+        <input type="email" name="email" required>
 
-        <div>
-            <label for="email">Correo electrónico:</label>
-            <input type="email" id="email" name="email" required>
-        </div>
+        <label for="password">Contraseña:</label>
+        <input type="password" name="password" required>
 
-        <div>
-            <label for="password">Contraseña:</label>
-            <input type="password" id="password" name="password" required>
-        </div>
+        <label for="password_confirmation">Confirmar Contraseña:</label>
+        <input type="password" name="password_confirmation" required>
 
-        <div>
-            <label for="confirmPassword">Repetir Contraseña:</label>
-            <input type="password" id="confirmPassword" name="confirmPassword" required>
-        </div>
+        <label for="address">Dirección:</label>
+        <input type="text" name="address" required>
 
-        <button type="submit">Registrar</button>
+        <button type="submit">Registrarse</button>
     </form>
-</body>
-</html>
+</div>
+@endsection

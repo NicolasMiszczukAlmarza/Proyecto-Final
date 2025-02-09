@@ -1,21 +1,22 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
-class UsuarioController extends Controller
+class RegisterController extends Controller
 {
-    // Método para almacenar el usuario en la base de datos
-    public function store(Request $request)
+    public function store(Request $request) // Método para registrar el usuario
     {
         // Validación de los datos
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|confirmed|min:8',
+            'password' => 'required|string|confirmed|min:8', // confirmed as default
             'address' => 'required|string|max:255',
         ]);
 
@@ -24,7 +25,7 @@ class UsuarioController extends Controller
             'name' => $validated['name'],
             'last_name' => $validated['last_name'],
             'email' => $validated['email'],
-            'password' => bcrypt($validated['password']),
+            'password' => Hash::make($validated['password']), // Hash para la contraseña
             'address' => $validated['address'],
         ]);
 

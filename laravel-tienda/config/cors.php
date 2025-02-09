@@ -3,11 +3,10 @@
 // config/cors.php
 
 return [
-    'paths' => ['api/*', 'sanctum/csrf-cookie'], // Incluir la ruta de CSRF
-    'allowed_methods' => ['*'],
-    'allowed_origins' => ['http://localhost:5173'], // El puerto de tu frontend
-    'allowed_headers' => ['*'],
-    'exposed_headers' => [],
-    'max_age' => 0,
-    'supports_credentials' => true,  // Muy importante para permitir cookies
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'register'],
+    'allowed_origins' => ['*'],  // Permite cualquier origen (puedes limitarlo a tu frontend)
+    'allowed_methods' => ['*'],  // Permite todos los métodos HTTP (GET, POST, etc.)
+    'allowed_headers' => ['*'],  // Permite todos los encabezados
+    'supports_credentials' => true,
+    
 ];
