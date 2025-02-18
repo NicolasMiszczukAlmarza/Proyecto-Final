@@ -1,88 +1,52 @@
 #root {
-  max-width: 1280px;
+  width: 100%;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
-
-
-/* Aseguramos que el contenedor principal ocupe todo el alto y el ancho de la ventana */
-/* Aseguramos que el contenedor principal ocupe todo el alto y el ancho de la ventana */
 .App {
   display: flex;
   justify-content: center;  /* Centra horizontalmente */
   align-items: center;      /* Centra verticalmente */
-  height: 100vh;            /* Ocupa el 100% del alto de la ventana */
+  height: 100vh;            /* Ocupa todo el alto de la ventana */
+  width: 100vw;             /* Ocupa todo el ancho de la ventana */
   margin: 0;                /* Elimina márgenes por defecto */
-  background-color: #f7f7f7; /* Fondo suave para hacer el contenido más visible */
+  padding: 20px;            /* Agrega algo de espacio lateral en pantallas pequeñas */
+  background-color: white;  /* Fondo blanco */
 }
 
 .login-container, .formulario-container {
-  width: 100%;             /* Hacemos que ocupe todo el ancho disponible */
-  max-width: 600px;        /* Ahora el contenedor tendrá un ancho máximo de 600px */
-  padding: 20px;
+  width: 100%;               /* Ocupa todo el ancho disponible */
+  max-width: 700px;          /* Más ancho para mejor visibilidad */
+  padding: 30px;             /* Más espacio interno */
   background-color: white;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra ligera para destacar el formulario */
-  border-radius: 8px;
-  text-align: center;      /* Centra el texto en el formulario */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+  border-radius: 10px;
+  text-align: center;
 }
 
 input {
-  width: 100%;             /* Los inputs ocuparán el 100% de la caja */
-  padding: 10px;
+  width: 100%; 
+  padding: 12px;
   margin: 10px 0;
-  border-radius: 4px;
+  border-radius: 5px;
   border: 1px solid #ccc;
+  font-size: 16px;
 }
 
 button {
-  padding: 10px 20px;
-  background-color: #007bff; /* Un azul fuerte para el botón */
+  padding: 12px;
+  background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   cursor: pointer;
   width: 100%;
-  font-size: 16px;
+  font-size: 18px;
   margin-top: 10px;
 }
 
 button:hover {
-  background-color: #0056b3; /* Cambio de color cuando se pasa el mouse */
+  background-color: #0056b3;
 }

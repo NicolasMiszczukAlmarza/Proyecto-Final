@@ -1,6 +1,9 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './components/Login';
 import Formulario from './components/Formulario';
+import Carrito from './components/Carrito';  // Importa el componente Carrito
+import 'bootstrap/dist/css/bootstrap.min.css';  // Importa Bootstrap
 import './App.css';  // Asegúrate de importar el archivo de estilos
 
 function App() {
@@ -10,6 +13,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/registro" element={<Formulario />} />
+          <Route path="/carrito" element={<Carrito />} /> {/* Nueva ruta para el Carrito */}
         </Routes>
       </Router>
     </div>

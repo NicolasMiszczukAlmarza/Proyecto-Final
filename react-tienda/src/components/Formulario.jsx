@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './Formulario.css';  // Asegúrate de tener estilos apropiados
+import { useNavigate } from 'react-router-dom'; // Para redireccionar
+import 'bootstrap/dist/css/bootstrap.min.css';  // Asegúrate de que Bootstrap esté importado
 
 const Formulario = () => {
   const [formData, setFormData] = useState({
     name: '',
-    last_name: '',  // Cambié 'lastName' a 'last_name' aquí
+    last_name: '',
     address: '',
     email: '',
     password: '',
@@ -13,6 +14,8 @@ const Formulario = () => {
   });
   const [loading, setLoading] = useState(false);
   const [csrfError, setCsrfError] = useState(null);
+  const [alert, setAlert] = useState({ message: '', type: '' }); // Para manejar alertas
+  const navigate = useNavigate(); // Hook de redirección
 
   // Obtener el token CSRF cuando se cargue el componente
   useEffect(() => {
@@ -20,7 +23,7 @@ const Formulario = () => {
       try {
         // Solicita el token CSRF
         await axios.get('http://127.0.0.1:8000/sanctum/csrf-cookie', {
-          withCredentials: true, // Asegúrate de enviar las cookies de sesión
+          withCredentials: true,
         });
 
         // Configura el token CSRF en los encabezados de axios
@@ -49,13 +52,13 @@ const Formulario = () => {
 
     // Verificación de que las contraseñas coincidan
     if (formData.password !== formData.confirmPassword) {
-      alert('⚠️ Las contraseñas no coinciden');
+      setAlert({ message: '⚠️ Las contraseñas no coinciden', type: 'danger' });
       return;
     }
 
     // Verificación de que el token CSRF esté disponible
     if (csrfError) {
-      alert('⚠️ No se puede registrar sin un token CSRF válido.');
+      setAlert({ message: '⚠️ No se puede registrar sin un token CSRF válido.', type: 'danger' });
       return;
     }
 
@@ -74,102 +77,118 @@ const Formulario = () => {
         withCredentials: true,  // Necesario para enviar las cookies de sesión
       });
 
+      setAlert({ message: `Usuario registrado con éxito: ${response.data.user.name}`, type: 'success' });
+      setTimeout(() => {
+        navigate('/');  // Redirige al login después de 2 segundos
+      }, 2000);
+
       console.log('Formulario enviado exitosamente:', response.data);
-      alert(`Usuario registrado: ${response.data.user.name}`);
-      // Opcional: Redirigir al usuario a otra página después del registro
     } catch (error) {
       console.error('Error al registrar usuario:', error);
       const errorMessage = error.response?.data?.message || '⚠️ Hubo un error al registrar el usuario.';
-      alert(errorMessage);  // Mostrar mensaje de error
+      setAlert({ message: errorMessage, type: 'danger' });
     } finally {
       setLoading(false);  // Desactivamos el estado de carga
     }
   };
 
   return (
-    <div className="formulario-container">
-      <h2>Formulario de Registro</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="name">Nombre:</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
+    <div className="container-fluid" style={{ backgroundColor: 'white', minHeight: '100vh' }}> {/* Cambié el fondo gris a blanco */}
+      {/* Mostrar alerta si existe */}
+      {alert.message && (
+        <div className={`alert alert-${alert.type}`} role="alert">
+          {alert.message}
         </div>
+      )}
 
-        <div className="form-group">
-          <label htmlFor="last_name">Apellidos:</label> {/* Comentario removido correctamente */}
-          <input
-            type="text"
-            id="last_name"
-            name="last_name"
-            value={formData.last_name}
-            onChange={handleChange}
-            required
-          />
-        </div>
+      <div className="formulario-container mx-auto" style={{ maxWidth: '600px', backgroundColor: 'white' }}>
+        <h2>Formulario de Registro</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+            <label htmlFor="name" className="form-label">Nombre:</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              className="form-control"
+              value={formData.name}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-        <div className="form-group">
-          <label htmlFor="address">Dirección:</label>
-          <input
-            type="text"
-            id="address"
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-            required
-          />
-        </div>
+          <div className="mb-3">
+            <label htmlFor="last_name" className="form-label">Apellidos:</label>
+            <input
+              type="text"
+              id="last_name"
+              name="last_name"
+              className="form-control"
+              value={formData.last_name}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-        <div className="form-group">
-          <label htmlFor="email">Correo electrónico:</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
+          <div className="mb-3">
+            <label htmlFor="address" className="form-label">Dirección:</label>
+            <input
+              type="text"
+              id="address"
+              name="address"
+              className="form-control"
+              value={formData.address}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-        <div className="form-group">
-          <label htmlFor="password">Contraseña:</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            minLength="8"
-          />
-        </div>
+          <div className="mb-3">
+            <label htmlFor="email" className="form-label">Correo electrónico:</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              className="form-control"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-        <div className="form-group">
-          <label htmlFor="confirmPassword">Repetir Contraseña:</label>
-          <input
-            type="password"
-            id="confirmPassword"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            required
-            minLength="8"
-          />
-        </div>
+          <div className="mb-3">
+            <label htmlFor="password" className="form-label">Contraseña:</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              className="form-control"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              minLength="8"
+            />
+          </div>
 
-        <button type="submit" disabled={loading}>
-          {loading ? 'Registrando...' : 'Registrarse'}
-        </button>
-      </form>
+          <div className="mb-3">
+            <label htmlFor="confirmPassword" className="form-label">Repetir Contraseña:</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              className="form-control"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              minLength="8"
+            />
+          </div>
 
-      {csrfError && <div className="error-message">{csrfError}</div>}
+          <button type="submit" className="btn btn-primary w-100" disabled={loading}>
+            {loading ? 'Registrando...' : 'Registrarse'}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
