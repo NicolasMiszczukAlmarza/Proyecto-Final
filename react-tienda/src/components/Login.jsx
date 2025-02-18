@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Login = () => {
   // Estados para el formulario
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const navigate = useNavigate();  // Inicializamos useNavigate para navegar entre rutas
@@ -12,7 +12,7 @@ const Login = () => {
   // Manejador para el submit del formulario
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Usuario:', username);
+    console.log('Correo:', email);
     console.log('Contraseña:', password);
     navigate('/carrito'); // Redirige al carrito después del login
   };
@@ -36,13 +36,13 @@ const Login = () => {
 
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
-              <label htmlFor="username" className="form-label">Usuario</label>
+              <label htmlFor="email" className="form-label">Correo electrónico</label>
               <input
-                type="text"
-                id="username"
+                type="email"
+                id="email"
                 className="form-control"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
