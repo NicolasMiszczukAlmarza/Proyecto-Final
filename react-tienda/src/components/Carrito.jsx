@@ -39,7 +39,7 @@ const Carrito = () => {
       {/* Segunda sección con bloques de categorías */}
       <div className="second-row row w-100 mt-4">
         {/* Bloque 1: Categorías */}
-        <div className="block col-4 p-3 text-center text-white rounded block-categorias">
+        <div className="block col-4 p-3 text-center rounded block-categorias">
           <h2>Categorías</h2>
           {/* Mapeamos las categorías para mostrarlas */}
           <div className="row">
@@ -56,13 +56,13 @@ const Carrito = () => {
         </div>
 
         {/* Bloque 2 */}
-        <div className="block col-4 bg-primary p-3 text-center text-white rounded">
+        <div className="block col-4 p-3 text-center rounded">
           <h2>Bloque 2</h2>
           {/* Aquí puedes agregar contenido específico para el bloque 2 */}
         </div>
 
         {/* Bloque 3 */}
-        <div className="block col-4 bg-success p-3 text-center text-white rounded">
+        <div className="block col-4 p-3 text-center rounded">
           <h2>Bloque 3</h2>
           {/* Aquí puedes agregar contenido específico para el bloque 3 */}
         </div>

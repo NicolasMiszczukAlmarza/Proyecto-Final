@@ -1,95 +1,98 @@
 /* Estilos generales */
 .container {
     padding: 20px;
-  }
-  
-  /* Estilos para la primera fila */
-  .first-row {
-    background-color: #f8f9fa;
+}
+
+
+/* Para el fondo de la primera fila */
+.first-row {
+    background: linear-gradient(to bottom, #007bff, #FFFFFF); /* Degradado de azul a blanco */
     padding: 20px;
     text-align: left;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Estilos para la segunda sección */
-  .second-row {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra similar a los bloques */
+}
+
+
+
+/* Estilos para la segunda sección */
+.second-row {
     display: flex;
     justify-content: space-between;
     margin-top: 20px;
-  }
-  
-  /* Bloques con bordes redondeados */
-  .block {
+}
+
+/* Bloques con bordes redondeados */
+.block {
     padding: 20px;
     border-radius: 8px;
     text-align: center;
-    color: white;
+    color: #333;  /* Color gris oscuro para el texto */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Estilos para el bloque de categorías */
-  .block-categorias {
-    background-color: #f57c00;
+    background: linear-gradient(to bottom, #ffffff, #007bff); /* Fondo degradado de blanco a azul */
+}
+
+/* Estilos para el bloque de categorías */
+.block-categorias {
+    background: linear-gradient(to bottom, #ffffff, #007bff); /* Fondo degradado de blanco a azul */
     padding: 20px;
     border-radius: 8px;
     text-align: center;
-    color: white;
+    color: #333; /* Gris oscuro para el texto */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     transition: background-color 0.3s ease, color 0.3s ease;
-  }
-  
-  /* Efecto hover: cambia el fondo a amarillo y el color de texto */
-  .card-hover {
+}
+
+/* Efecto hover: cambia el fondo a amarillo y el color de texto */
+.card-hover {
     transition: background-color 0.3s ease, color 0.3s ease;
-  }
-  
-  .card-hover:hover {
+}
+
+.card-hover:hover {
     background-color: #ffeb3b !important;
     color: #333 !important;
-  }
-  
-  /* Bloques con el 15% de ancho para el bloque 1 y 3, y el 70% para el bloque 2 */
-  .block:nth-child(1),
-  .block:nth-child(3) {
+}
+
+/* Bloques con el 15% de ancho para el bloque 1 y 3, y el 70% para el bloque 2 */
+.block:nth-child(1),
+.block:nth-child(3) {
     flex-basis: 15%;
-  }
-  
-  .block:nth-child(2) {
+}
+
+.block:nth-child(2) {
     flex-basis: 70%;
-  }
-  
-  /* Responsividad: ajusta los bloques en pantallas más pequeñas */
-  @media (max-width: 768px) {
+}
+
+/* Responsividad: ajusta los bloques en pantallas más pequeñas */
+@media (max-width: 768px) {
     .second-row {
-      flex-direction: column;
-      align-items: center;
+        flex-direction: column;
+        align-items: center;
     }
-  
+
     .block {
-      width: 80%;
-      margin-bottom: 16px;
+        width: 80%;
+        margin-bottom: 16px;
     }
-  }
-  
-  /* Estilo para los botones */
-  .btn {
+}
+
+/* Estilo para los botones */
+.btn {
     transition: background-color 0.3s ease;
-  }
-  
-  .btn-primary {
+}
+
+.btn-primary {
     background-color: #007bff;
-  }
-  
-  .btn-primary:hover {
+}
+
+.btn-primary:hover {
     background-color: #0056b3;
-  }
-  
-  .btn-danger {
+}
+
+.btn-danger {
     background-color: #dc3545;
-  }
-  
-  .btn-danger:hover {
+}
+
+.btn-danger:hover {
     background-color: #c82333;
-  }
-  
+}
