@@ -1,0 +1,95 @@
+/* Estilos generales */
+.container {
+    padding: 20px;
+  }
+  
+  /* Estilos para la primera fila */
+  .first-row {
+    background-color: #f8f9fa;
+    padding: 20px;
+    text-align: left;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Estilos para la segunda sección */
+  .second-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  
+  /* Bloques con bordes redondeados */
+  .block {
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Estilos para el bloque de categorías */
+  .block-categorias {
+    background-color: #f57c00;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  /* Efecto hover: cambia el fondo a amarillo y el color de texto */
+  .card-hover {
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  .card-hover:hover {
+    background-color: #ffeb3b !important;
+    color: #333 !important;
+  }
+  
+  /* Bloques con el 15% de ancho para el bloque 1 y 3, y el 70% para el bloque 2 */
+  .block:nth-child(1),
+  .block:nth-child(3) {
+    flex-basis: 15%;
+  }
+  
+  .block:nth-child(2) {
+    flex-basis: 70%;
+  }
+  
+  /* Responsividad: ajusta los bloques en pantallas más pequeñas */
+  @media (max-width: 768px) {
+    .second-row {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .block {
+      width: 80%;
+      margin-bottom: 16px;
+    }
+  }
+  
+  /* Estilo para los botones */
+  .btn {
+    transition: background-color 0.3s ease;
+  }
+  
+  .btn-primary {
+    background-color: #007bff;
+  }
+  
+  .btn-primary:hover {
+    background-color: #0056b3;
+  }
+  
+  .btn-danger {
+    background-color: #dc3545;
+  }
+  
+  .btn-danger:hover {
+    background-color: #c82333;
+  }
+  
