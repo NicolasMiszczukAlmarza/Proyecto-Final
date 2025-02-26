@@ -3,22 +3,54 @@ import { Link, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Login = () => {
-  // Estados para el formulario
+  // Estados para el formulario y el mensaje de error
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-  const navigate = useNavigate();  // Inicializamos useNavigate para navegar entre rutas
+  const [errorMessage, setErrorMessage] = useState('');
+  const navigate = useNavigate();
 
   // Manejador para el submit del formulario
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Correo:', email);
-    console.log('Contraseña:', password);
+    console.log('Formulario enviado');
 
-    // Guardamos el correo en localStorage
-    localStorage.setItem('userEmail', email);
+    // Limpiar mensaje de error antes de intentar nuevamente
+    setErrorMessage('');
 
-    navigate('/carrito'); // Redirige al carrito después del login
+    try {
+      // 1️⃣ Obtener el token CSRF antes de hacer login
+      await fetch('http://localhost:8000/sanctum/csrf-cookie', {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      // 2️⃣ Enviar la solicitud de login
+      const response = await fetch('http://localhost:8000/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ email, password }),
+      });
+
+      console.log('Respuesta del servidor:', response);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data.message);
+
+        // Guardamos el correo en localStorage y redirigimos
+        localStorage.setItem('userEmail', email);
+        navigate('/carrito');
+      } else {
+        // Si la respuesta no es exitosa, mostrar mensaje de error
+        setErrorMessage('Usuario no registrado y/o contraseña incorrecta');
+      }
+    } catch (error) {
+      console.error('Error en el login:', error);
+      setErrorMessage('Hubo un problema con el servidor');
+    }
   };
 
   return (
@@ -31,6 +63,14 @@ const Login = () => {
           <div className="col-12 text-center mb-4">
             <h2 className="fw-bold" style={{ color: '#000' }}>Iniciar Sesión</h2>
           </div>
+
+          {/* 🔴 Mostrar mensaje de error en rojo si existe */}
+          {errorMessage && (
+            <div className="alert alert-danger text-center fw-bold" role="alert">
+              {errorMessage}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
               <label htmlFor="email" className="form-label">Correo electrónico</label>

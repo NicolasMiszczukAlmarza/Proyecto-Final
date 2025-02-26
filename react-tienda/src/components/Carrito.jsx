@@ -10,9 +10,27 @@ const Carrito = () => {
   const navigate = useNavigate();
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null);
 
-  const handleCerrarSesion = () => {
-    localStorage.removeItem("usuario");
-    navigate("/");
+  const handleCerrarSesion = async () => {
+    try {
+      // Llamada al backend para cerrar sesión en el servidor
+      const response = await fetch("http://localhost:8000/logout", {
+        method: "POST",
+        credentials: "include", // Para enviar las cookies de sesión
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        // Si el logout es exitoso, eliminamos el usuario del localStorage
+        localStorage.removeItem("usuario");
+        navigate("/"); // Redirigir al usuario a la página de inicio
+      } else {
+        console.error("Error al cerrar sesión en el servidor.");
+      }
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
   };
 
   const handleCategoriaClick = (nombreCategoria) => {
@@ -42,10 +60,8 @@ const Carrito = () => {
               </button>
             </div>
           </div>
-          
+
           {/* Mensaje de bienvenida en el header */}
-         
-          
           <nav className="categorias-menu w-100">
             <div className="container-fluid categorias-container d-flex justify-content-center">
               {categorias.map((categoria) => (
