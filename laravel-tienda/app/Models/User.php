@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Hash; // Asegurar que se use Hash
 
 class User extends Authenticatable
 {
@@ -42,17 +43,4 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-
-    /**
-     * Establecer la relación con la contraseña encriptada.
-     * Esto no es necesario si usas bcrypt() al crear el usuario, pero
-     * es una buena práctica tenerlo aquí por si se necesita algo más.
-     *
-     * @param string $password
-     * @return void
-     */
-    public function setPasswordAttribute($password)
-    {
-        $this->attributes['password'] = bcrypt($password);
-    }
 }

@@ -14,16 +14,14 @@ class Kernel extends HttpKernel
      * @var array<int, class-string|string>
      */
     protected $middleware = [
-        // \App\Http\Middleware\TrustHosts::class,
         \App\Http\Middleware\TrustProxies::class,
-        \Illuminate\Http\Middleware\HandleCors::class,
+        \Illuminate\Http\Middleware\HandleCors::class, // 👈 Asegúrate de que está aquí
         \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-
-
     ];
+    
 
     /**
      * The application's route middleware groups.
@@ -39,9 +37,11 @@ protected $middlewareGroups = [
         \Illuminate\Session\Middleware\StartSession::class,
         \Illuminate\View\Middleware\ShareErrorsFromSession::class,
         \Illuminate\Routing\Middleware\SubstituteBindings::class,
-        \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class, // Este es el que debes tener aquí
+        \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class, // 🔥 Requerido para sesiones con Sanctum
+        \App\Http\Middleware\VerifyCsrfToken::class, 
     ],
 ];
+
 
 
     
