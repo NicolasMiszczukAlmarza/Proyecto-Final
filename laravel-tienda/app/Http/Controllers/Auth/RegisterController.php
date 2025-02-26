@@ -20,13 +20,14 @@ class RegisterController extends Controller
             'address' => 'required|string|max:255',
         ]);
 
-        // Crear el usuario en la base de datos
+        // Crear el usuario en la base de datos con el rol "normal" por defecto
         $user = User::create([
             'name' => $validated['name'],
             'last_name' => $validated['last_name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']), // Hash para la contraseña
             'address' => $validated['address'],
+            'roles' => 'normal', // Rol asignado automáticamente
         ]);
 
         // Retornar una respuesta con el usuario creado
