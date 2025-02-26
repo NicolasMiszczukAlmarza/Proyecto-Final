@@ -30,44 +30,42 @@ const Carrito = () => {
     <>
       {/* Cabecera fija */}
       <header className="header fixed-top">
-        <div className="container-fluid d-flex justify-content-between align-items-center p-3">
-          <img src="public/img/logo/logo.jpg" alt="Logo" className="logo" />
-          <input type="text" className="form-control search-bar mx-3" placeholder="Buscar productos..." />
-          <div className="d-flex align-items-center">
-            <FontAwesomeIcon icon={faShoppingCart} className="icono-carrito mx-2" />
-            <FontAwesomeIcon icon={faUser} className="icono-usuario mx-2" />
-            <button className="btn btn-danger btn-sm ms-3" onClick={handleCerrarSesion}>
-              Cerrar sesión
-            </button>
+        <div className="container-fluid d-flex flex-column align-items-center p-3">
+          <div className="d-flex justify-content-between w-100 align-items-center">
+            <img src="public/img/logo/logo.jpg" alt="Logo" className="logo" />
+            <input type="text" className="form-control search-bar mx-3" placeholder="Buscar productos..." />
+            <div className="d-flex align-items-center">
+              <FontAwesomeIcon icon={faShoppingCart} className="icono-carrito mx-2" />
+              <FontAwesomeIcon icon={faUser} className="icono-usuario mx-2" />
+              <button className="btn btn-danger btn-sm ms-3" onClick={handleCerrarSesion}>
+                Cerrar sesión
+              </button>
+            </div>
           </div>
+          
+          {/* Mensaje de bienvenida en el header */}
+         
+          
+          <nav className="categorias-menu w-100">
+            <div className="container-fluid categorias-container d-flex justify-content-center">
+              {categorias.map((categoria) => (
+                <span
+                  key={categoria.id}
+                  className={`categoria ${categoriaSeleccionada === categoria.nombre ? "selected" : ""} ${
+                    categoria.id === 11 ? "mas-vendida" : ""
+                  }`}
+                  onClick={() => handleCategoriaClick(categoria.nombre)}
+                >
+                  {categoria.nombre}
+                </span>
+              ))}
+            </div>
+          </nav>
         </div>
-        <nav className="categorias-menu">
-          <div className="container-fluid categorias-container">
-            {categorias.map((categoria) => (
-              <span
-                key={categoria.id}
-                className={`categoria ${categoriaSeleccionada === categoria.nombre ? "selected" : ""} ${
-                  categoria.id === 11 ? "mas-vendida" : ""
-                }`}
-                onClick={() => handleCategoriaClick(categoria.nombre)}
-              >
-                {categoria.nombre}
-              </span>
-            ))}
-          </div>
-        </nav>
       </header>
 
       {/* Contenedor principal con margen superior corregido */}
-      <main className="container productos-container">
-        <div className="mensaje-carrito text-center">
-          <h2>Bienvenido al Carrito</h2>
-          <p>
-            {categoriaSeleccionada
-              ? `Mostrando productos de la categoría: ${categoriaSeleccionada}`
-              : "Aquí puedes ver todos los productos disponibles."}
-          </p>
-        </div>
+      <main className="container productos-container mt-5 pt-5">
         <div className="row productos-lista">
           {productosFiltrados.length > 0 ? (
             productosFiltrados.map((producto) => (

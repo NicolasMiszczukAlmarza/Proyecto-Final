@@ -77,8 +77,8 @@ body {
 
 /* Contenedor principal */
 .productos-container {
-    margin-top: 180px; /* Más margen para evitar que la cabecera cubra el contenido */
-    padding-top: 20px;
+    margin-top: 200px; /* Ajusta según necesidad */
+    padding-bottom: 50px; /* Espacio extra al final */
 }
 
 /* Mensaje de bienvenida */
@@ -95,7 +95,10 @@ body {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+    margin-top: 120%; /* Ajusta según necesidad */
+    min-height: 10%; /* Asegura que haya espacio suficiente sin afectar todas las categorías */
 }
+
 
 /* Tarjetas de productos */
 .producto-card {
