@@ -7,48 +7,35 @@ import './CarritoInvitado.css';
 const CarritoInvitado = () => {
   const navigate = useNavigate();
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null);
-  const [busqueda, setBusqueda] = useState(""); // Estado para la búsqueda
+  const [busqueda, setBusqueda] = useState("");
 
-  // Filtra las categorías excluyendo "Mas Vendida"
+  // Filtra categorías excluyendo "Más Vendida"
   const categoriasFiltradas = categorias.filter((categoria) => categoria.nombre !== "Mas Vendida");
 
-  // Filtra productos en base a la categoría seleccionada y la búsqueda
-  const productosFiltrados = productos.filter((producto) => {
+  // Filtra productos por categoría
+  const productosPorCategoria = productos.filter((producto) => {
     const categoria = categorias.find((cat) => cat.id === producto.id_categoria);
-    const coincideConCategoria = categoriaSeleccionada
-      ? categoria && categoria.nombre === categoriaSeleccionada
-      : true;
-
-    const coincideConBusqueda = producto.nombre.toLowerCase().includes(busqueda.toLowerCase());
-
-    return coincideConCategoria && coincideConBusqueda;
+    return categoriaSeleccionada ? categoria && categoria.nombre === categoriaSeleccionada : false;
   });
 
-  // No modificamos el margen superior si la búsqueda tiene resultados
-  let marginTop = "0%"; // Valor por defecto cuando hay productos filtrados
-
-  // Si hay productos, pero la búsqueda no está activa, ajustar el margen
-  if (busqueda.length === 0) {
-    if (productosFiltrados.length < 8) {
-      marginTop = "0%"; // Si hay menos de 8 productos, el margen es 15%
-    } else {
-      marginTop = "0%"; // Si hay más de 8 productos, el margen es 30%
-    }
-  }
+  // Filtra productos por búsqueda
+  const productosPorBusqueda = productos.filter((producto) =>
+    producto.nombre.toLowerCase().includes(busqueda.toLowerCase())
+  );
 
   const handleCerrarSesion = async () => {
     try {
       const response = await fetch("http://localhost:8000/logout", {
         method: "POST",
-        credentials: "include", // Para enviar las cookies de sesión
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
       });
 
       if (response.ok) {
-        localStorage.removeItem("userEmail"); // Eliminar el email del localStorage
-        navigate("/"); // Redirige al inicio
+        localStorage.removeItem("userEmail");
+        navigate("/");
       } else {
         console.error("Error al cerrar sesión.");
       }
@@ -59,13 +46,12 @@ const CarritoInvitado = () => {
 
   const handleCategoriaClick = (nombreCategoria) => {
     setCategoriaSeleccionada((prev) => (prev === nombreCategoria ? null : nombreCategoria));
+    setBusqueda(""); // Limpia la búsqueda al seleccionar categoría
   };
 
   const handleBusquedaChange = (e) => {
     setBusqueda(e.target.value);
-    if (e.target.value !== "") {
-      setCategoriaSeleccionada(null); // Desmarcar categorías al buscar
-    }
+    setCategoriaSeleccionada(null); // Limpia la categoría al buscar
   };
 
   return (
@@ -80,8 +66,8 @@ const CarritoInvitado = () => {
               type="text"
               className="form-control search-bar mx-3"
               placeholder="Buscar productos..."
-              value={busqueda} 
-              onChange={handleBusquedaChange} 
+              value={busqueda}
+              onChange={handleBusquedaChange}
             />
             <button className="btn btn-danger btn-sm ms-3" onClick={handleCerrarSesion}>
               Cerrar sesión
@@ -105,27 +91,80 @@ const CarritoInvitado = () => {
         </div>
       </header>
 
-      {/* Contenedor de productos */}
-      <main className="container productos-container mt-5 pt-5" style={{ marginTop }}>
-        <div className="row productos-lista">
-          {productosFiltrados.length > 0 ? (
-            productosFiltrados.map((producto) => (
-              <div key={producto.id} className="col-md-4 mb-4">
-                <div className="card producto-card">
-                  <img src={producto.img} className="card-img-top" alt={producto.nombre} />
-                  <div className="card-body">
-                    <h5 className="card-title">{producto.nombre}</h5>
-                    <p className="card-text">{producto.descripcion}</p>
-                    <h6 className="text-primary">${producto.precio}</h6>
+      {/* Contenedor de productos por búsqueda */}
+      {busqueda && (
+        <main className="container productos-busqueda productos-busqueda-activa" style={{ marginTop: "-70%" }}>
+          <h3 className="text-center">Resultados de búsqueda</h3>
+          <div className="row productos-lista">
+            {productosPorBusqueda.length > 0 ? (
+              productosPorBusqueda.map((producto) => (
+                <div key={producto.id} className="col-md-4 mb-4">
+                  <div className="card producto-card">
+                    <img src={producto.img} className="card-img-top" alt={producto.nombre} />
+                    <div className="card-body">
+                      <h5 className="card-title">{producto.nombre}</h5>
+                      <p className="card-text">{producto.descripcion}</p>
+                      <h6 className="text-primary">{producto.precio}€</h6>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-center w-100">No hay productos que coincidan con la búsqueda o categoría seleccionada.</p>
-          )}
-        </div>
-      </main>
+              ))
+            ) : (
+              <p className="text-center w-100">No hay productos que coincidan con la búsqueda.</p>
+            )}
+          </div>
+        </main>
+      )}
+
+      {/* Contenedor de productos por categoría */}
+      {categoriaSeleccionada && !busqueda && (
+        <main className="container productos-categoria" style={{ marginTop: "-10%" }}>
+          <h3 className="text-center">Productos de {categoriaSeleccionada}</h3>
+          <div className="row productos-lista">
+            {productosPorCategoria.length > 0 ? (
+              productosPorCategoria.map((producto) => (
+                <div key={producto.id} className="col-md-4 mb-4">
+                  <div className="card producto-card">
+                    <img src={producto.img} className="card-img-top" alt={producto.nombre} />
+                    <div className="card-body">
+                      <h5 className="card-title">{producto.nombre}</h5>
+                      <p className="card-text">{producto.descripcion}</p>
+                      <h6 className="text-primary">{producto.precio}€</h6>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-center w-100">No hay productos en esta categoría.</p>
+            )}
+          </div>
+        </main>
+      )}
+
+      {/* Contenedor de todos los productos cuando no hay búsqueda ni categoría seleccionada */}
+      {!busqueda && !categoriaSeleccionada && (
+        <main className="container productos-todos" style={{ marginTop: "150px" }}>
+          <h3 className="text-center">Todos los productos</h3>
+          <div className="row productos-lista">
+            {productos.length > 0 ? (
+              productos.map((producto) => (
+                <div key={producto.id} className="col-md-4 mb-4">
+                  <div className="card producto-card">
+                    <img src={producto.img} className="card-img-top" alt={producto.nombre} />
+                    <div className="card-body">
+                      <h5 className="card-title">{producto.nombre}</h5>
+                      <p className="card-text">{producto.descripcion}</p>
+                      <h6 className="text-primary">{producto.precio}€</h6>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-center w-100">No hay productos disponibles.</p>
+            )}
+          </div>
+        </main>
+      )}
     </>
   );
 };

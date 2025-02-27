@@ -23,7 +23,7 @@ body {
     height: 80px;
 }
 
-/* Barra de búsqueda */
+/* Contenedor de búsqueda */
 .search-container {
     display: flex;
     align-items: center;
@@ -31,6 +31,7 @@ body {
     position: relative;
 }
 
+/* Barra de búsqueda */
 .search-bar {
     flex-grow: 1;
     max-width: 600px;
@@ -39,32 +40,24 @@ body {
     padding: 10px;
     border-radius: 30px;
     border: 1px solid #ddd;
-    transition: margin-top 0.3s ease;
+    transition: all 0.3s ease;
 }
 
-/* Agregar un cambio visual cuando hay texto en la barra de búsqueda */
+/* Cambio visual cuando hay texto en la barra de búsqueda */
 .search-bar:not(:placeholder-shown) {
-    border-color: #007bff;  /* Cambiar el color del borde cuando haya texto */
-}
-
-/* Icono de búsqueda (si lo quieres agregar) */
-.search-icon {
-    position: absolute;
-    right: 10px;
-    font-size: 18px;
-    color: #999;
+    border-color: #007bff;
 }
 
 /* Botón de Cerrar Sesión */
 .btn-danger {
     background-color: #dc3545;
     transition: background-color 0.3s;
-    padding: 5px 12px;  /* Reducido para hacerlo más estrecho */
+    padding: 5px 12px;
     font-size: 0.9rem;
     border-radius: 20px;
-    min-width: 100px;  /* Ancho mínimo para que el texto no se desborde */
-    max-width: 120px;  /* Establecer un ancho máximo */
-    text-align: center;  /* Asegura que el texto esté centrado */
+    min-width: 100px;
+    max-width: 120px;
+    text-align: center;
 }
 
 .btn-danger:hover {
@@ -95,10 +88,10 @@ body {
     color: #007bff;
 }
 
-/* Contenedor principal */
+/* Contenedor de productos */
 .productos-container {
     padding-bottom: 50px;
-    transition: margin-top 0.3s ease; /* Añadimos transición para suavizar el cambio de margen */
+    transition: margin-top 0.3s ease;
 }
 
 /* Lista de productos */
@@ -106,7 +99,7 @@ body {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    transition: margin-top 0.3s ease; /* Para que los productos se deslicen al buscar */
+    transition: margin-top 0.3s ease;
 }
 
 /* Tarjetas de productos */
@@ -127,21 +120,25 @@ body {
     border-radius: 8px 8px 0 0;
 }
 
-/* Responsividad */
+
+
+
+/* Ajustes responsivos */
 @media (max-width: 768px) {
     /* Barra de búsqueda */
     .search-bar {
         flex: 1;
-        max-width: 800px;  /* Hacemos la barra aún más ancha */
-        width: 100%;       /* Ocupa el 100% del espacio disponible dentro de su contenedor */
-        margin: 0 auto;    /* Centra la barra de búsqueda */
-        padding: 10px;     /* Añadimos algo de espacio interno para mejorar su apariencia */
+        max-width: 800px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 10px;
     }
 
+    /* Lista de productos */
     .productos-lista {
         flex-direction: column;
         align-items: center;
-        margin-top: 5%;
+        margin-top: 2%;
     }
 
     .producto-card {
@@ -149,12 +146,35 @@ body {
         margin-bottom: 16px;
     }
 
-    /* Ajustes cuando se activa la búsqueda */
+    /* Ajuste cuando la búsqueda está activa */
     .productos-container.busqueda-activa {
-        margin-top: 30% !important;  /* Ajusta la altura del contenedor cuando la búsqueda está activa */
+        margin-top: 12% !important; /* Reducido de 30% a 12% */
     }
 
     .search-bar.busqueda-activa {
-        margin-top: 5%;  /* Da un margen adicional para que no se vea apretado */
+        margin-top: 2%; /* Reducido de 5% a 2% */
     }
+
+    /* Contenedor de productos por búsqueda */
+.productos-busqueda {
+    padding-top: 20px; /* Espaciado superior */
+    padding-bottom: 50px; /* Espaciado inferior */
+    transition: margin-top 0.3s ease;
+}
+
+/* Contenedor de productos cuando hay búsqueda activa */
+.productos-busqueda-activa {
+    padding-top: 250px; /* Añadir espacio en la parte superior */
+    transition: padding-top 0.3s ease; /* Animación suave */
+}
+
+/* Ajuste para pantallas más pequeñas */
+@media (max-width: 768px) {
+    .productos-busqueda-activa {
+        padding-top: 150px; /* Menos espacio en móviles */
+    }
+}
+
+
+
 }
