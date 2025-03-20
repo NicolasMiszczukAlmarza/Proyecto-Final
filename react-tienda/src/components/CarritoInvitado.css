@@ -23,14 +23,6 @@ body {
     height: 80px;
 }
 
-/* Contenedor de búsqueda */
-.search-container {
-    display: flex;
-    align-items: center;
-    flex-grow: 1;
-    position: relative;
-}
-
 /* Barra de búsqueda */
 .search-bar {
     flex-grow: 1;
@@ -41,11 +33,6 @@ body {
     border-radius: 30px;
     border: 1px solid #ddd;
     transition: all 0.3s ease;
-}
-
-/* Cambio visual cuando hay texto en la barra de búsqueda */
-.search-bar:not(:placeholder-shown) {
-    border-color: #007bff;
 }
 
 /* Botón de Cerrar Sesión */
@@ -89,20 +76,13 @@ body {
 }
 
 /* Contenedor de productos */
-.productos-container {
-    padding-bottom: 50px;
-    transition: margin-top 0.3s ease;
-}
-
-/* Lista de productos */
 .productos-lista {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    transition: margin-top 0.3s ease;
+    margin-top: 50px;
 }
 
-/* Tarjetas de productos */
 .producto-card {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
@@ -120,25 +100,19 @@ body {
     border-radius: 8px 8px 0 0;
 }
 
-
-
-
 /* Ajustes responsivos */
 @media (max-width: 768px) {
     /* Barra de búsqueda */
     .search-bar {
-        flex: 1;
-        max-width: 800px;
-        width: 100%;
+        max-width: 100%;
         margin: 0 auto;
         padding: 10px;
     }
 
-    /* Lista de productos */
     .productos-lista {
         flex-direction: column;
         align-items: center;
-        margin-top: 2%;
+        margin-top: 20px;
     }
 
     .producto-card {
@@ -146,35 +120,56 @@ body {
         margin-bottom: 16px;
     }
 
-    /* Ajuste cuando la búsqueda está activa */
-    .productos-container.busqueda-activa {
-        margin-top: 12% !important; /* Reducido de 30% a 12% */
+    /* Menú de categorías */
+    .categorias-container {
+        flex-wrap: wrap;
+        justify-content: center;
     }
 
-    .search-bar.busqueda-activa {
-        margin-top: 2%; /* Reducido de 5% a 2% */
+    .categoria {
+        font-size: 1rem;
+        margin: 5px;
     }
 
-    /* Contenedor de productos por búsqueda */
-.productos-busqueda {
-    padding-top: 20px; /* Espaciado superior */
-    padding-bottom: 50px; /* Espaciado inferior */
-    transition: margin-top 0.3s ease;
-}
+    /* Ajuste para la cabecera */
+    .header {
+        padding: 15px 0;
+    }
 
-/* Contenedor de productos cuando hay búsqueda activa */
-.productos-busqueda-activa {
-    padding-top: 250px; /* Añadir espacio en la parte superior */
-    transition: padding-top 0.3s ease; /* Animación suave */
-}
-
-/* Ajuste para pantallas más pequeñas */
-@media (max-width: 768px) {
+    /* Ajuste en el padding superior para productos cuando hay búsqueda */
     .productos-busqueda-activa {
-        padding-top: 150px; /* Menos espacio en móviles */
+        padding-top: 80px;
+    }
+
+    /* Aumentar tamaño de los botones en pantallas pequeñas */
+    .btn-danger {
+        font-size: 1rem;
     }
 }
 
+/* Ajuste para pantallas aún más pequeñas */
+@media (max-width: 480px) {
+    .productos-lista {
+        margin-top: 30px;
+    }
 
+    .producto-card {
+        width: 100%;
+        margin-bottom: 16px;
+    }
 
+    /* Barra de búsqueda */
+    .search-bar {
+        max-width: 100%;
+        padding: 8px;
+    }
+
+    /* Menú de categorías */
+    .categorias-container {
+        gap: 15px;
+    }
+
+    .categoria {
+        font-size: 0.9rem;
+    }
 }

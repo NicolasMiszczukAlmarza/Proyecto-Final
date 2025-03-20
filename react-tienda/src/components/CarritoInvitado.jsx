@@ -27,15 +27,18 @@ const CarritoInvitado = () => {
     try {
       const response = await fetch("http://localhost:8000/logout", {
         method: "POST",
-        credentials: "include",
+        credentials: "include", // Mantén la sesión si es necesario
         headers: {
           "Content-Type": "application/json",
         },
       });
 
       if (response.ok) {
+        // Si la sesión se cierra correctamente, eliminamos el email del localStorage
         localStorage.removeItem("userEmail");
-        navigate("/");
+
+        // Redirigimos al usuario al login
+        navigate("/login");  // Aquí rediriges a la página de login
       } else {
         console.error("Error al cerrar sesión.");
       }

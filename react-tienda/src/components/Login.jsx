@@ -98,8 +98,7 @@ const Login = () => {
           </form>
           <div className="text-center mt-3">
             <p>¿No tienes cuenta? <Link to="/registro">¡Créala aquí!</Link></p>
-            {/* Aquí agregamos el hipervínculo para acceder como invitado */}
-            <p><Link to="/carrito-invitado">Acceder como invitado</Link></p>
+          
           </div>
         </div>
       </div>

@@ -14,6 +14,7 @@ body {
     width: 100%;
     top: 0;
     z-index: 1000;
+    height: 100px; /* Ajuste de la altura de la cabecera */
 }
 
 /* Logo */
@@ -75,10 +76,10 @@ body {
     color: #007bff;
 }
 
-/* Contenedor principal */
+/* Contenedor principal para los productos */
 .productos-container {
-    margin-top: 200px; /* Ajusta según necesidad */
-    padding-bottom: 50px; /* Espacio extra al final */
+    padding-top: 850vh; /* Ajusta para mover el contenido más hacia abajo, ahora en 150vh */
+    padding-bottom: 50px; /* Espacio adicional al final */
 }
 
 /* Mensaje de bienvenida */
@@ -95,10 +96,8 @@ body {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    margin-top: 120%; /* Ajusta según necesidad */
-    min-height: 10%; /* Asegura que haya espacio suficiente sin afectar todas las categorías */
+    margin-top: 20px; /* Espacio entre los productos */
 }
-
 
 /* Tarjetas de productos */
 .producto-card {
@@ -126,7 +125,7 @@ body {
     }
 
     .productos-container {
-        margin-top: 200px; /* Aumentamos el margen en móviles */
+        padding-top: 200vh; /* Mueve el contenedor aún más abajo en dispositivos móviles */
     }
 
     .productos-lista {
@@ -140,15 +139,9 @@ body {
     }
 
     /* Categorías menú */
-.categorias-container {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-}
-
-.categoria.mas-vendida {
-   bottom: -15%;
-}
-
-
+    .categorias-container {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+    }
 }

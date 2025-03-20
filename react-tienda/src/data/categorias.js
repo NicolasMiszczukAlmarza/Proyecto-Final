@@ -49,11 +49,7 @@ const categorias = [
         "nombre": "Discos duros HDD",
         "img": "/img/icono/hdd.PNG"  // Ruta corregida
     },
-    {
-        "id": 11,
-        "nombre": "Mas Vendida",
-        "img": "/img/icono/ssd.PNG"  // Ruta corregida
-    }
+   
     
 
 ];

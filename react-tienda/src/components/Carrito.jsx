@@ -3,28 +3,33 @@ import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart, faUser } from "@fortawesome/free-solid-svg-icons";
 import "./Carrito.css";
-import { categorias } from "../data/categorias";
-import { productos } from "../data/productos";
+import { categorias } from "../data/categorias"; // Asegúrate de tener las categorías correctas
+import { productos } from "../data/productos"; // Asegúrate de tener los productos correctos
 
 const Carrito = () => {
   const navigate = useNavigate();
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null);
+  const [searchTerm, setSearchTerm] = useState(""); // Estado para la barra de búsqueda
 
+  // Función para manejar el cierre de sesión
   const handleCerrarSesion = async () => {
     try {
-      // Llamada al backend para cerrar sesión en el servidor
+      // Realizamos la solicitud de cierre de sesión al servidor
       const response = await fetch("http://localhost:8000/logout", {
         method: "POST",
-        credentials: "include", // Para enviar las cookies de sesión
+        credentials: "include", // Para enviar las cookies de sesión si las hay
         headers: {
           "Content-Type": "application/json",
         },
       });
 
       if (response.ok) {
-        // Si el logout es exitoso, eliminamos el usuario del localStorage
-        localStorage.removeItem("usuario");
-        navigate("/"); // Redirigir al usuario a la página de inicio
+        // Eliminar los datos de sesión almacenados en el localStorage o cookies
+        localStorage.removeItem("usuario"); // Elimina el token o cualquier dato de usuario
+        // Si también se almacena en cookies, las cookies deberían ser eliminadas aquí.
+
+        // Redirigir al usuario al login
+        navigate("/login"); // Redirige a la página de login (ajusta la ruta si es diferente)
       } else {
         console.error("Error al cerrar sesión en el servidor.");
       }
@@ -33,16 +38,24 @@ const Carrito = () => {
     }
   };
 
+  // Función para manejar el clic en una categoría
   const handleCategoriaClick = (nombreCategoria) => {
     setCategoriaSeleccionada((prev) => (prev === nombreCategoria ? null : nombreCategoria));
   };
 
-  const productosFiltrados = categoriaSeleccionada
-    ? productos.filter((producto) => {
-        const categoria = categorias.find((cat) => cat.id === producto.id_categoria);
-        return categoria && categoria.nombre === categoriaSeleccionada;
-      })
-    : productos;
+  // Función para manejar el cambio en la barra de búsqueda
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value); // Actualiza el estado con el término de búsqueda
+  };
+
+  // Filtra los productos por categoría y por búsqueda (no distingue entre mayúsculas y minúsculas)
+  const productosFiltrados = productos.filter((producto) => {
+    const categoria = categorias.find((cat) => cat.id === producto.id_categoria);
+    const matchesCategoria = categoriaSeleccionada ? categoria.nombre === categoriaSeleccionada : true;
+    const matchesBusqueda =
+      producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) || producto.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesCategoria && matchesBusqueda;
+  });
 
   return (
     <>
@@ -51,7 +64,13 @@ const Carrito = () => {
         <div className="container-fluid d-flex flex-column align-items-center p-3">
           <div className="d-flex justify-content-between w-100 align-items-center">
             <img src="public/img/logo/logo.jpg" alt="Logo" className="logo" />
-            <input type="text" className="form-control search-bar mx-3" placeholder="Buscar productos..." />
+            <input
+              type="text"
+              className="form-control search-bar mx-3"
+              placeholder="Buscar productos..."
+              value={searchTerm} // Vincula el valor con el estado
+              onChange={handleSearchChange} // Actualiza el estado cuando el usuario escribe
+            />
             <div className="d-flex align-items-center">
               <FontAwesomeIcon icon={faShoppingCart} className="icono-carrito mx-2" />
               <FontAwesomeIcon icon={faUser} className="icono-usuario mx-2" />
@@ -61,15 +80,13 @@ const Carrito = () => {
             </div>
           </div>
 
-          {/* Mensaje de bienvenida en el header */}
+          {/* Menú de categorías */}
           <nav className="categorias-menu w-100">
             <div className="container-fluid categorias-container d-flex justify-content-center">
               {categorias.map((categoria) => (
                 <span
                   key={categoria.id}
-                  className={`categoria ${categoriaSeleccionada === categoria.nombre ? "selected" : ""} ${
-                    categoria.id === 11 ? "mas-vendida" : ""
-                  }`}
+                  className={`categoria ${categoriaSeleccionada === categoria.nombre ? "selected" : ""}`}
                   onClick={() => handleCategoriaClick(categoria.nombre)}
                 >
                   {categoria.nombre}
@@ -80,7 +97,7 @@ const Carrito = () => {
         </div>
       </header>
 
-      {/* Contenedor principal con margen superior corregido */}
+      {/* Contenedor principal con margen superior ajustado */}
       <main className="container productos-container mt-5 pt-5">
         <div className="row productos-lista">
           {productosFiltrados.length > 0 ? (
@@ -98,7 +115,7 @@ const Carrito = () => {
               </div>
             ))
           ) : (
-            <p className="text-center w-100">No hay productos en esta categoría.</p>
+            <p className="text-center w-100">No se encontraron productos que coincidan con esa búsqueda.</p>
           )}
         </div>
       </main>
