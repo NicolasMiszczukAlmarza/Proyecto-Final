@@ -1,0 +1,93 @@
+/* Botón Disminuir */
+.btn-decrement {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 5px;
+  }
+  
+  /* Botón Aumentar */
+  .btn-increment {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: green;
+    color: white;
+    border: none;
+    border-radius: 5px;
+  }
+  
+  /* Botón Vaciar Carrito */
+  .btn-danger.w-100 {
+    width: 100%;
+    background-color: red;
+    border-color: red;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 5px;
+  }
+  
+  /* Botón Proceder al Pago */
+  .btn-primary.w-100 {
+    width: 100%;
+    background-color: #6f42c1;
+    border-color: #6f42c1;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 5px;
+  }
+  
+  /* Asegurar que las imágenes no se deformen */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Modal Footer Ajustes */
+  .modal-footer .w-100 {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .modal-footer .btn {
+    width: 100%;
+  }
+
+
+/* Asegúrate de que la clase .modal-title esté centrada en su contenedor */
+.modal-title {
+    width: 100%; /* Asegura que el título ocupe todo el ancho disponible */
+    text-align: center; /* Centra el texto */
+    font-size: 2rem; /* Tamaño más grande para que sea destacable */
+    font-weight: bold; /* Texto en negrita */
+    color: #6f42c1; /* Color morado */
+    padding: 10px 0; /* Espaciado arriba y abajo */
+    margin-bottom: 20px; /* Espacio abajo del título */
+  }
+  
+  /* Si necesitas que el contenedor también tenga un estilo adicional */
+  .modal-header {
+    display: flex;
+    justify-content: center; /* Asegura que el título esté centrado horizontalmente */
+    align-items: center; /* Alinea el contenido verticalmente en el centro */
+  }
+  
+  /* Aplica negrita al nombre del producto */
+.producto-nombre {
+    font-weight: bold;
+  }
+  
+
+  .total-con-descuento {
+    font-weight: bold;
+  }
+  

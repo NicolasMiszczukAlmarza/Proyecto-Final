@@ -14,7 +14,8 @@ body {
     width: 100%;
     top: 0;
     z-index: 1000;
-    height: 100px; /* Ajuste de la altura de la cabecera */
+    height: 100px;
+    /* Ajuste de la altura de la cabecera */
 }
 
 /* Logo */
@@ -78,13 +79,16 @@ body {
 
 /* Contenedor principal para los productos */
 .productos-container {
-    padding-top: 850vh; /* Ajusta para mover el contenido más hacia abajo, ahora en 150vh */
-    padding-bottom: 50px; /* Espacio adicional al final */
+    padding-top: 850vh;
+    /* Ajusta para mover el contenido más hacia abajo, ahora en 150vh */
+    padding-bottom: 50px;
+    /* Espacio adicional al final */
 }
 
 /* Mensaje de bienvenida */
 .mensaje-carrito {
-    margin-top: 110%; /* Ajuste adicional */
+    margin-top: 110%;
+    /* Ajuste adicional */
     padding: 15px;
     background-color: #f8f9fa;
     border-radius: 8px;
@@ -96,7 +100,8 @@ body {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    margin-top: 20px; /* Espacio entre los productos */
+    margin-top: 20px;
+    /* Espacio entre los productos */
 }
 
 /* Tarjetas de productos */
@@ -125,7 +130,8 @@ body {
     }
 
     .productos-container {
-        padding-top: 200vh; /* Mueve el contenedor aún más abajo en dispositivos móviles */
+        padding-top: 200vh;
+        /* Mueve el contenedor aún más abajo en dispositivos móviles */
     }
 
     .productos-lista {
@@ -144,4 +150,19 @@ body {
         justify-content: center;
         gap: 20px;
     }
+
+    .btn-custom-rojo2 {
+        background-color: #ffa500 !important;
+        /* Naranja */
+        border: none !important;
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 20px !important;
+        padding: 0 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+
+
 }

@@ -43,11 +43,14 @@ const Formulario = () => {
 
     setLoading(true);
     try {
+      // Enviar la solicitud de registro
       await axios.post('http://127.0.0.1:8000/register', dataToSend, { withCredentials: true });
       setAlert({ message: '✅ Usuario registrado con éxito', type: 'success' });
-      setTimeout(() => navigate('/'), 2000);
+      setTimeout(() => {
+        navigate('/login'); // Redirigir al login después del registro exitoso
+      }, 2000);
     } catch (error) {
-      setAlert({ message: '⚠️ Hubo un error al registrar el usuario, puede que el correo este en uso.', type: 'danger' });
+      setAlert({ message: '⚠️ Hubo un error al registrar el usuario, puede que el correo esté en uso.', type: 'danger' });
     } finally {
       setLoading(false);
     }
