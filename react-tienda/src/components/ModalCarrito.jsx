@@ -1,103 +1,90 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import './ModalCarrito.css';  // Asegúrate de que el archivo CSS esté importado
+import './ModalCarrito.css';
 
 const ModalCarrito = ({ carrito, onCerrar, onEliminarProducto, onActualizarCantidad }) => {
     const [cantidad, setCantidad] = useState({});
     const [codigoDescuento, setCodigoDescuento] = useState('');
     const [codigoGenerado, setCodigoGenerado] = useState('');
-    const [totalSinIva, setTotalSinIva] = useState(0);  // Total sin IVA
-    const [totalConIva, setTotalConIva] = useState(0);  // Total con IVA
-    const [descuentoAplicado, setDescuentoAplicado] = useState(0);  // Descuento aplicado
-    const [totalConDescuento, setTotalConDescuento] = useState(0);  // Total con descuento
-    const [descuentoYaAplicado, setDescuentoYaAplicado] = useState(false);  // Para asegurarse de que el descuento se aplique solo una vez
+    const [totalSinIva, setTotalSinIva] = useState(0);
+    const [totalConIva, setTotalConIva] = useState(0);
+    const [descuentoAplicado, setDescuentoAplicado] = useState(0);
+    const [totalFinal, setTotalFinal] = useState(0);
+    const [descuentoYaAplicado, setDescuentoYaAplicado] = useState(false);
+    const [mostrarNotificacion, setMostrarNotificacion] = useState(false);
+    const [mensajeNotificacion, setMensajeNotificacion] = useState('');
 
-    const calcularTotal = () => {
-        return carrito.reduce(
+    useEffect(() => {
+        // Actualiza el total con el estado de las cantidades actuales.
+        const total = carrito.reduce(
             (total, producto) => total + producto.precio * (cantidad[producto.id] || producto.cantidad),
             0
         );
-    };
+        const totalConIvaCalculado = total * 1.21;
+        
+        setTotalSinIva(total);
+        setTotalConIva(totalConIvaCalculado);
+        setTotalFinal(totalConIvaCalculado - descuentoAplicado);
+    }, [carrito, cantidad, descuentoAplicado]);
 
-    const calcularTotalConIva = (totalSinIva) => {
-        return totalSinIva * 1.21; // Aplicamos el 21% de IVA
+    const actualizarCantidad = (producto, nuevaCantidad) => {
+        if (nuevaCantidad < 1) return; // Aseguramos que la cantidad no sea menor que 1
+
+        if (nuevaCantidad > 5) {
+            setMensajeNotificacion('No puedes agregar más de 5 productos.');
+            setMostrarNotificacion(true);
+            return; // Detenemos la ejecución para no actualizar la cantidad si excede el límite
+        }
+
+        // Reemplazamos la cantidad en lugar de sumarla
+        setCantidad(prevCantidad => {
+            return { ...prevCantidad, [producto.id]: nuevaCantidad };
+        });
+
+        // Actualizamos la cantidad en el carrito
+        onActualizarCantidad(producto.id, nuevaCantidad);
     };
 
     const generarCodigoDescuento = () => {
         const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
         const numeros = '0123456789';
         let codigo = '';
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 3; i++) {
             codigo += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
         }
         for (let i = 0; i < 2; i++) {
             codigo += numeros.charAt(Math.floor(Math.random() * numeros.length));
         }
         setCodigoGenerado(codigo);
-        setCodigoDescuento(codigo);  // Se asigna el código generado al campo de texto
+        setCodigoDescuento(codigo);
     };
-
-    const handleCantidadChange = (productoId, newCantidad) => {
-        if (newCantidad >= 1 && newCantidad <= 5) {
-            setCantidad((prev) => ({ ...prev, [productoId]: newCantidad }));
-            onActualizarCantidad(productoId, newCantidad);  // Actualiza la cantidad
-        }
-    };
-
-    const vaciarCarrito = () => {
-        carrito.forEach((producto) => {
-            onEliminarProducto(producto.id);
-        });
-    };
-
-    useEffect(() => {
-        const total = calcularTotal();
-        const totalSinIvaCalculado = total;
-        const totalConIvaCalculado = calcularTotalConIva(total);
-
-        setTotalSinIva(totalSinIvaCalculado);  // Total sin IVA
-        setTotalConIva(totalConIvaCalculado);  // Total con IVA
-
-        setTotalConDescuento(totalConIvaCalculado);  // Inicializamos el total con descuento igual al total con IVA
-
-        if (totalConIvaCalculado > 1500 && !descuentoYaAplicado) {
-            generarCodigoDescuento(); // Generamos un código si el total con IVA es mayor a 1500€
-        }
-    }, [carrito, cantidad, descuentoYaAplicado]);
 
     const aplicarDescuento = () => {
         if (codigoDescuento === codigoGenerado && !descuentoYaAplicado) {
-            const descuento = totalConIva * 0.30; // 30% de descuento
-            const totalFinalConDescuento = totalConIva - descuento;  // Total con descuento
-            setDescuentoAplicado(descuento);  // Guardamos el valor del descuento
-            setTotalConDescuento(totalFinalConDescuento);  // Actualizamos el total con descuento correctamente
-            setDescuentoYaAplicado(true);  // Marcar que el descuento ya ha sido aplicado
-        } else if (descuentoYaAplicado) {
-            alert("El descuento ya ha sido aplicado.");
+            const descuento = totalConIva * 0.30;
+            setDescuentoAplicado(descuento);
+            setTotalFinal(totalConIva - descuento);
+            setDescuentoYaAplicado(true);
         } else {
-            alert("Código de descuento inválido");
+            setMensajeNotificacion(descuentoYaAplicado ? "El descuento ya ha sido aplicado." : "Código de descuento inválido");
+            setMostrarNotificacion(true);
         }
     };
 
+    const cerrarNotificacion = () => {
+        setMostrarNotificacion(false);
+    };
+
+    const vaciarCarrito = () => {
+        carrito.forEach((producto) => onEliminarProducto(producto.id));
+    };
+
     return (
-        <div
-            className="modal fade show"
-            style={{
-                display: "block",
-                position: "fixed",
-                top: 0,
-                right: 0,
-                zIndex: 1050,
-            }}
-            aria-labelledby="exampleModalLabel"
-            aria-hidden="true"
-        >
+        <div className="modal fade show" style={{ display: "block", position: "fixed", top: 0, right: 0, zIndex: 1050 }}>
             <div className="modal-dialog modal-lg">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <h5 className="modal-title text-center">
-                            Tu Carrito
-                        </h5>
+                        <h5 className="modal-title text-center">Tu Carrito</h5>
                         <button type="button" className="btn-close" onClick={onCerrar}></button>
                     </div>
                     <div className="modal-body">
@@ -105,101 +92,42 @@ const ModalCarrito = ({ carrito, onCerrar, onEliminarProducto, onActualizarCanti
                             <p>No tienes productos en el carrito.</p>
                         ) : (
                             <div>
-                                <ul className="list-group">
-                                    {carrito.map((producto) => (
-                                        <li
-                                            key={producto.id}
-                                            className="list-group-item d-flex justify-content-between align-items-center"
-                                        >
-                                            <div className="d-flex align-items-center">
-                                                <img
-                                                    src={producto.img}
-                                                    alt={producto.nombre}
-                                                    style={{
-                                                        width: "50px",
-                                                        height: "50px",
-                                                        objectFit: "cover",
-                                                        marginRight: "10px",
-                                                    }}
-                                                />
-                                                <div>
-                                                    <h6 className="producto-nombre">{producto.nombre}</h6>
-                                                    <p>{producto.descripcion}</p>
-                                                    <div className="d-flex align-items-center">
-                                                        <button
-                                                            className="btn btn-decrement"
-                                                            onClick={() =>
-                                                                handleCantidadChange(
-                                                                    producto.id,
-                                                                    (cantidad[producto.id] || producto.cantidad) - 1
-                                                                )
-                                                            }
-                                                        >
-                                                            -
-                                                        </button>
-                                                        <input
-                                                            type="number"
-                                                            value={cantidad[producto.id] || producto.cantidad}
-                                                            onChange={(e) =>
-                                                                handleCantidadChange(
-                                                                    producto.id,
-                                                                    parseInt(e.target.value, 10)
-                                                                )
-                                                            }
-                                                            min="1"
-                                                            max="5"
-                                                            className="form-control"
-                                                            style={{
-                                                                width: "60px",
-                                                                textAlign: "center",
-                                                            }}
-                                                            readOnly
-                                                        />
-                                                        <button
-                                                            className="btn btn-increment"
-                                                            onClick={() =>
-                                                                handleCantidadChange(
-                                                                    producto.id,
-                                                                    (cantidad[producto.id] || producto.cantidad) + 1
-                                                                )
-                                                            }
-                                                        >
-                                                            +
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <span className="badge bg-primary rounded-pill">
-                                                {(producto.precio * (cantidad[producto.id] || producto.cantidad)).toFixed(2)}€
-                                            </span>
-                                            <button
-                                                className="btn btn-danger btn-sm ms-2"
-                                                onClick={() => onEliminarProducto(producto.id)}
-                                            >
-                                                Eliminar
-                                            </button>
-                                        </li>
-                                    ))}
-                                </ul>
-
-                                {/* Mostrar los totales */}
+                                {carrito.map((producto) => (
+                                    <div key={producto.id} className="d-flex align-items-center mb-3 border-bottom pb-2">
+                                        <img 
+                                            src={producto.img} 
+                                            alt={producto.nombre} 
+                                            className="img-thumbnail" 
+                                            style={{ width: 80, height: 80, objectFit: 'cover' }}
+                                            onError={(e) => e.target.src = "/imagenes/default.jpg"} 
+                                        />
+                                        <div className="ms-3 flex-grow-1">
+                                            <h6>{producto.nombre}</h6>
+                                            <p className="mb-1">{producto.precio.toFixed(2)}€</p>
+                                            <input 
+                                                type="number" 
+                                                min="1" 
+                                                value={cantidad[producto.id] || producto.cantidad} 
+                                                onChange={(e) => actualizarCantidad(producto, parseInt(e.target.value, 10))} 
+                                                className="form-control w-50" 
+                                            />
+                                        </div>
+                                        <button className="btn btn-danger" onClick={() => onEliminarProducto(producto.id)}>Eliminar</button>
+                                    </div>
+                                ))}
                                 <div className="mt-3 d-flex justify-content-between">
-                                    <h6>Total sin IVA:</h6>
-                                    <h6>{totalSinIva.toFixed(2)}€</h6>
-                                </div>
-                                <div className="mt-3 d-flex justify-content-between">
-                                    <h6>Total con IVA (antes del descuento):</h6>
+                                    <h6>Total con IVA:</h6>
                                     <h6>{totalConIva.toFixed(2)}€</h6>
                                 </div>
                                 {descuentoAplicado > 0 && (
-                                    <div className="mt-3 d-flex justify-content-between" style={{ color: "red" }}>
+                                    <div className="mt-3 d-flex justify-content-between text-danger">
                                         <h6>Descuento aplicado:</h6>
                                         <h6>-{descuentoAplicado.toFixed(2)}€</h6>
                                     </div>
                                 )}
                                 <div className="mt-3 d-flex justify-content-between">
-                                    <h6>Total final con descuento:</h6>
-                                    <h6>{totalConDescuento.toFixed(2)}€</h6>
+                                    <h6>Precio Final:</h6>
+                                    <h6>{totalFinal.toFixed(2)}€</h6>
                                 </div>
                             </div>
                         )}
@@ -207,47 +135,29 @@ const ModalCarrito = ({ carrito, onCerrar, onEliminarProducto, onActualizarCanti
                     <div className="modal-footer">
                         {totalConIva > 1500 && !descuentoYaAplicado && (
                             <div className="w-100">
-                                <input
-                                    type="text"
-                                    value={codigoDescuento}
-                                    onChange={(e) => setCodigoDescuento(e.target.value)}
-                                    placeholder="Introduce código de descuento"
-                                    className="form-control"
-                                />
-                                <button
-                                    type="button"
-                                    className="btn btn-success mt-2"
-                                    onClick={aplicarDescuento}
-                                >
-                                    Aplicar descuento
-                                </button>
+                                <button className="btn btn-warning w-100" onClick={generarCodigoDescuento}>Generar Código de Descuento</button>
+                                <input type="text" value={codigoDescuento} onChange={(e) => setCodigoDescuento(e.target.value)} className="form-control mt-2" />
+                                <button className="btn btn-success mt-2 w-100" onClick={aplicarDescuento}>Aplicar descuento</button>
                             </div>
                         )}
-                        <div className="w-100">
-                            <button
-                                type="button"
-                                className="btn btn-danger w-100"
-                                onClick={vaciarCarrito}
-                            >
-                                Vaciar el carrito
-                            </button>
-                        </div>
-                        <div className="w-100 mt-2">
-                            <button
-                                type="button"
-                                className="btn btn-primary w-100"
-                                onClick={() => alert("Proceder al pago...")}
-                                style={{
-                                    backgroundColor: "#6f42c1",
-                                    borderColor: "#6f42c1",
-                                }}
-                            >
-                                Proceder al pago
-                            </button>
-                        </div>
+                        <button className="btn btn-danger w-100" onClick={vaciarCarrito}>Vaciar Carrito</button>
+                        <button className="btn btn-primary w-100 mt-2" onClick={() => alert("Realizando pedido...")}>Realizar Pedido</button>
                     </div>
                 </div>
             </div>
+
+            {/* Notificación directamente en el modal */}
+            {mostrarNotificacion && (
+                <div style={{
+                    position: 'absolute', top: '10px', right: '10px', backgroundColor: 'rgba(0, 0, 0, 0.8)', 
+                    color: 'white', padding: '10px', borderRadius: '5px', zIndex: 2000
+                }}>
+                    <span>{mensajeNotificacion}</span>
+                    <button onClick={cerrarNotificacion} style={{
+                        background: 'transparent', border: 'none', color: 'white', fontSize: '16px', marginLeft: '10px'
+                    }}>X</button>
+                </div>
+            )}
         </div>
     );
 };

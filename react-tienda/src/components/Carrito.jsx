@@ -104,7 +104,6 @@ const Carrito = () => {
 
   return (
     <>
-      {/* Cabecera fija */}
       <header className="header fixed-top">
         <div className="container-fluid d-flex flex-column align-items-center p-3">
           <div className="d-flex justify-content-between w-100 align-items-center">
@@ -117,7 +116,6 @@ const Carrito = () => {
               onChange={handleSearchChange}
             />
             <div className="d-flex align-items-center">
-              {/* Icono de carrito, al hacer clic se muestra el modal */}
               <FontAwesomeIcon
                 icon={faShoppingCart}
                 className="icono-carrito mx-2"
@@ -130,8 +128,6 @@ const Carrito = () => {
               </button>
             </div>
           </div>
-
-          {/* Menú de categorías */}
           <nav className="categorias-menu w-100">
             <div className="container-fluid categorias-container d-flex justify-content-center">
               {categorias.map((categoria) => (
@@ -148,7 +144,6 @@ const Carrito = () => {
         </div>
       </header>
 
-      {/* Contenedor principal con margen superior ajustado */}
       <main className="container productos-container mt-5 pt-5">
         <div className="row productos-lista">
           {productosFiltrados.length > 0 ? (
@@ -187,70 +182,14 @@ const Carrito = () => {
                   <img src={productoSeleccionado.img} alt={productoSeleccionado.nombre} className="img-fluid" style={{ width: '100px', height: '100px', objectFit: 'cover' }} />
                 </div>
                 <div className="d-flex justify-content-center align-items-center mt-3">
-                  {/* Botón Disminuir */}
-                  <button
-                    className="btn-custom-rojo2"
-                    onClick={disminuirCantidad}
-                    style={{
-                      width: '40px',
-                      height: '40px',
-                      fontSize: '20px',
-                      padding: '0',
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }}
-                  >
-                    -
-                  </button>
-
-                  {/* Input de cantidad */}
-                  <input
-                    type="number"
-                    value={cantidad}
-                    onChange={handleCantidadChange}
-                    min="1"
-                    max="5"
-                    className="form-control mx-2"
-                    style={{ width: '60px', textAlign: 'center' }}
-                    readOnly
-                  />
-
-                  {/* Botón Aumentar */}
-                  <button
-                    className="btn btn-success"
-                    onClick={aumentarCantidad}
-                    style={{
-                      width: '40px',
-                      height: '40px',
-                      fontSize: '20px',
-                      padding: '0',
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }}
-                  >
-                    +
-                  </button>
+                  <button className="btn-custom-rojo2" onClick={disminuirCantidad}>-</button>
+                  <input type="number" value={cantidad} onChange={handleCantidadChange} min="1" max="5" className="form-control mx-2" style={{ width: '60px', textAlign: 'center' }} readOnly />
+                  <button className="btn btn-success" onClick={aumentarCantidad}>+</button>
                 </div>
               </div>
               <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={agregarAlCarrito}
-                  style={{ backgroundColor: '#6f42c1', borderColor: '#6f42c1' }}
-                >
-                  Agregar al carrito
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowModal(false)}
-                  style={{ backgroundColor: '#8e44ad', borderColor: '#8e44ad' }}
-                >
-                  Cerrar
-                </button>
+                <button type="button" className="btn btn-primary" onClick={agregarAlCarrito}>Agregar al carrito</button>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cerrar</button>
               </div>
             </div>
           </div>
