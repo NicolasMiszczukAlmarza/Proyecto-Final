@@ -1,22 +1,24 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './components/Login'; // Asegúrate de importar el componente Login
-import Formulario from './components/Formulario'; // Asegúrate de importar el componente Formulario
-import Carrito from './components/Carrito';  // Importa el componente Carrito
-import CarritoInvitado from './components/CarritoInvitado';  // Importa el componente CarritoInvitado
-import 'bootstrap/dist/css/bootstrap.min.css';  // Importa Bootstrap
-import './App.css';  // Asegúrate de importar el archivo de estilos
+import Login from './components/Login';
+import Formulario from './components/Formulario';
+import Carrito from './components/Carrito';
+import CarritoInvitado from './components/CarritoInvitado';
+import Pago from './components/Pago/Pago';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './App.css';
 
 function App() {
   return (
-    <div className="App"> {/* Aplica la clase 'App' al contenedor principal */}
+    <div className="App">
       <Router>
         <Routes>
-          <Route path="/" element={<Navigate to="/carrito-invitado" />} /> {/* Redirige al carrito de invitado al iniciar */}
+          <Route path="/" element={<Navigate to="/carrito-invitado" />} />
           <Route path="/registro" element={<Formulario />} />
-          <Route path="/carrito" element={<Carrito />} /> {/* Ruta para el Carrito */}
-          <Route path="/carrito-invitado" element={<CarritoInvitado />} /> {/* Ruta para el Carrito de Invitado */}
-          <Route path="/login" element={<Login />} /> {/* Ruta para el Login */}
+          <Route path="/carrito" element={<Carrito />} />
+          <Route path="/carrito-invitado" element={<CarritoInvitado />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/pago" element={<Pago />} /> {/* Ruta para la página de pago */}
         </Routes>
       </Router>
     </div>

@@ -73,7 +73,7 @@ const CarritoInvitado = () => {
               onChange={handleBusquedaChange}
             />
             <button className="btn btn-danger btn-sm ms-3" onClick={handleCerrarSesion}>
-              Cerrar sesión
+              Iniciar sesión
             </button>
           </div>
 
