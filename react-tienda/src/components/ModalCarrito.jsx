@@ -17,52 +17,39 @@ const ModalCarrito = ({ carrito, onCerrar, onEliminarProducto, onActualizarCanti
   const generarCodigoDescuento = () => {
     const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const numeros = '0123456789';
-    
     let codigo = '';
-    
-    // Generar 2-3 letras aleatorias
     for (let i = 0; i < Math.floor(Math.random() * 2) + 2; i++) {
       codigo += letras.charAt(Math.floor(Math.random() * letras.length));
     }
-    
-    // Generar 2 números aleatorios
     for (let i = 0; i < 2; i++) {
       codigo += numeros.charAt(Math.floor(Math.random() * numeros.length));
     }
-
-    setCodigoGenerado(codigo); // Guardar el código generado
+    setCodigoGenerado(codigo);
     return codigo;
   };
 
-  // Generar el código de descuento aleatorio cuando el componente se monta
   useEffect(() => {
     generarCodigoDescuento();
   }, []);
 
-  // Calcula los totales sin el descuento
   useEffect(() => {
     const total = carrito.reduce(
       (total, producto) => total + producto.precio * (cantidad[producto.id] || producto.cantidad),
       0
     );
-
-    // Calculamos el total con IVA (21%)
     const totalConIvaCalculado = total * 1.21;
-
     setTotalSinIva(total);
     setTotalConIva(totalConIvaCalculado);
-    setTotalFinal(totalConIvaCalculado); // Inicialmente, el total final es solo con IVA
+    setTotalFinal(totalConIvaCalculado);
   }, [carrito, cantidad]);
 
   const realizarPedido = () => {
-    // Aquí pasamos el totalFinal al estado de la ruta de pago
-    navigate("/pago", { state: { totalFinal } });
+    navigate("/pago", { state: { totalFinal, carrito } });
   };
 
   const manejarCodigoDescuento = () => {
-    // Lógica para aplicar el descuento con un código
     if (codigoDescuento === codigoGenerado) {
-      const descuento = totalConIva * 0.10; // Aplicamos un 10% de descuento
+      const descuento = totalConIva * 0.10;
       const descuentoFinal = totalConIva - descuento;
       setDescuentoAplicado(descuento);
       setTotalFinal(descuentoFinal);
@@ -102,20 +89,21 @@ const ModalCarrito = ({ carrito, onCerrar, onEliminarProducto, onActualizarCanti
                         min="1"
                         value={cantidad[producto.id] || producto.cantidad}
                         onChange={(e) => {
+                          const nuevaCantidad = parseInt(e.target.value, 10);
                           setCantidad(prevCantidad => ({
                             ...prevCantidad,
-                            [producto.id]: parseInt(e.target.value, 10)
+                            [producto.id]: nuevaCantidad
                           }));
-                          onActualizarCantidad(producto.id, parseInt(e.target.value, 10));
+                          onActualizarCantidad(producto.id, nuevaCantidad);
                         }}
                         className="form-control w-50"
                       />
                     </div>
-                    <button className="btn btn-danger" onClick={() => onEliminarProducto(producto.id)}>Eliminar</button>
+                    <button className="btn btn-danger" onClick={() => onEliminarProducto(producto.id)}>
+                      Eliminar
+                    </button>
                   </div>
                 ))}
-
-                {/* Mostrar la opción para aplicar el descuento solo si el total con IVA supera los 1500€ */}
                 {totalConIva > 1500 && (
                   <div className="mt-3">
                     <p><strong>Código de descuento: {codigoGenerado}</strong></p>
@@ -135,20 +123,16 @@ const ModalCarrito = ({ carrito, onCerrar, onEliminarProducto, onActualizarCanti
                     </button>
                   </div>
                 )}
-
                 <div className="mt-3 d-flex justify-content-between">
                   <h6>Total con IVA:</h6>
                   <h6>{totalConIva.toFixed(2)}€</h6>
                 </div>
-
-                {/* Solo mostramos el descuento si se aplica */}
                 {descuentoAplicado > 0 && (
                   <div className="mt-3 d-flex justify-content-between text-success">
                     <h6>Descuento:</h6>
                     <h6>-{descuentoAplicado.toFixed(2)}€</h6>
                   </div>
                 )}
-
                 <div className="mt-3 d-flex justify-content-between">
                   <h6>Precio Final:</h6>
                   <h6>{totalFinal.toFixed(2)}€</h6>
@@ -157,8 +141,12 @@ const ModalCarrito = ({ carrito, onCerrar, onEliminarProducto, onActualizarCanti
             )}
           </div>
           <div className="modal-footer">
-            <button className="btn btn-danger w-100" onClick={() => onEliminarProducto()}>Vaciar Carrito</button>
-            <button className="btn btn-primary w-100 mt-2" onClick={realizarPedido}>Realizar Pedido</button>
+            <button className="btn btn-danger w-100" onClick={() => onEliminarProducto()}>
+              Vaciar Carrito
+            </button>
+            <button className="btn btn-primary w-100 mt-2" onClick={realizarPedido}>
+              Realizar Pedido
+            </button>
           </div>
         </div>
       </div>

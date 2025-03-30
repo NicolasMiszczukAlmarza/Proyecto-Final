@@ -50,7 +50,8 @@ const Carrito = () => {
     const categoria = categorias.find((cat) => cat.id === producto.id_categoria);
     const matchesCategoria = categoriaSeleccionada ? categoria.nombre === categoriaSeleccionada : true;
     const matchesBusqueda =
-      producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) || producto.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
+      producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      producto.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategoria && matchesBusqueda;
   });
 
@@ -100,6 +101,15 @@ const Carrito = () => {
 
   const eliminarProductoCarrito = (id) => {
     setCarrito((prevCarrito) => prevCarrito.filter((producto) => producto.id !== id));
+  };
+
+  // Función para actualizar la cantidad de un producto en el carrito
+  const actualizarCantidad = (id, nuevaCantidad) => {
+    setCarrito((prevCarrito) =>
+      prevCarrito.map((producto) =>
+        producto.id === id ? { ...producto, cantidad: nuevaCantidad } : producto
+      )
+    );
   };
 
   return (
@@ -179,17 +189,35 @@ const Carrito = () => {
               </div>
               <div className="modal-body">
                 <div className="d-flex justify-content-center align-items-center">
-                  <img src={productoSeleccionado.img} alt={productoSeleccionado.nombre} className="img-fluid" style={{ width: '100px', height: '100px', objectFit: 'cover' }} />
+                  <img
+                    src={productoSeleccionado.img}
+                    alt={productoSeleccionado.nombre}
+                    className="img-fluid"
+                    style={{ width: "100px", height: "100px", objectFit: "cover" }}
+                  />
                 </div>
                 <div className="d-flex justify-content-center align-items-center mt-3">
                   <button className="btn-custom-rojo2" onClick={disminuirCantidad}>-</button>
-                  <input type="number" value={cantidad} onChange={handleCantidadChange} min="1" max="5" className="form-control mx-2" style={{ width: '60px', textAlign: 'center' }} readOnly />
+                  <input
+                    type="number"
+                    value={cantidad}
+                    onChange={handleCantidadChange}
+                    min="1"
+                    max="5"
+                    className="form-control mx-2"
+                    style={{ width: "60px", textAlign: "center" }}
+                    readOnly
+                  />
                   <button className="btn btn-success" onClick={aumentarCantidad}>+</button>
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-primary" onClick={agregarAlCarrito}>Agregar al carrito</button>
-                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cerrar</button>
+                <button type="button" className="btn btn-primary" onClick={agregarAlCarrito}>
+                  Agregar al carrito
+                </button>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                  Cerrar
+                </button>
               </div>
             </div>
           </div>
@@ -202,6 +230,7 @@ const Carrito = () => {
           carrito={carrito}
           onCerrar={() => setShowCarritoModal(false)}
           onEliminarProducto={eliminarProductoCarrito}
+          onActualizarCantidad={actualizarCantidad}
         />
       )}
     </>
