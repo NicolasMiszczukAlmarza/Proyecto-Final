@@ -4,8 +4,10 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\PedidoController;  // Importamos el controlador
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
 // 📌 Agrupar rutas dentro del middleware 'web' para manejar sesiones correctamente
@@ -67,4 +69,7 @@ Route::middleware(['web'])->group(function () {
     Route::get('/login', function () {
         return response()->json(['message' => 'Esta ruta solo acepta POST'], 405);
     });
+
+    // 📌 Ruta para registrar pedidos usando el controlador
+    Route::post('/pedidos', [PedidoController::class, 'store']);
 });
