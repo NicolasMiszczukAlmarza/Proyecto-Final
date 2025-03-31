@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { FaCcVisa, FaCcMastercard, FaCcAmex, FaCcDiscover } from 'react-icons/fa';
 import './Pago.css';
 
@@ -7,7 +9,7 @@ const Pago = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { totalFinal, carrito } = location.state;
-  
+
   const [titular, setTitular] = useState('');
   const [numeroTarjeta, setNumeroTarjeta] = useState('');
   const [fechaCaducidad, setFechaCaducidad] = useState('');
@@ -19,7 +21,15 @@ const Pago = () => {
     e.preventDefault();
 
     if (!titular || !numeroTarjeta || !fechaCaducidad || !cvv) {
-      alert('Por favor, complete todos los datos de la tarjeta.');
+      toast.error('Por favor, complete todos los datos de la tarjeta.', {
+        position: 'top-center',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: 'colored',
+      });
       return;
     }
 
@@ -33,7 +43,12 @@ const Pago = () => {
       }
     } catch (error) {
       console.error('Error al obtener CSRF token:', error);
-      alert('Error al conectar con el servidor (CSRF)');
+      toast.error('Error al conectar con el servidor (CSRF)', {
+        position: 'top-center',
+        autoClose: 3000,
+        hideProgressBar: false,
+        theme: 'colored',
+      });
       return;
     }
 
@@ -52,14 +67,31 @@ const Pago = () => {
       });
       const result = await response.json();
       if (response.ok) {
-        alert(result.message);
-        navigate('/factura', { state: { correo, carrito, total: totalFinal } });
+        toast.success('Pedido realizado con éxito', {
+          position: 'top-center',
+          autoClose: 3000,
+          hideProgressBar: false,
+          theme: 'colored',
+        });
+        setTimeout(() => {
+          navigate('/factura', { state: { correo, carrito, total: totalFinal } });
+        }, 3500);
       } else {
-        alert('Error al registrar el pedido: ' + (result.message || 'Error desconocido'));
+        toast.error('Error al registrar el pedido: ' + (result.message || 'Error desconocido'), {
+          position: 'top-center',
+          autoClose: 3000,
+          hideProgressBar: false,
+          theme: 'colored',
+        });
       }
     } catch (error) {
       console.error('Error al enviar el pedido:', error);
-      alert('Error al conectar con el servidor');
+      toast.error('Error al conectar con el servidor', {
+        position: 'top-center',
+        autoClose: 3000,
+        hideProgressBar: false,
+        theme: 'colored',
+      });
     }
   };
 
@@ -95,6 +127,7 @@ const Pago = () => {
         </div>
         <button type="submit" className="btn-submit">Realizar Pedido</button>
       </form>
+      <ToastContainer />
     </div>
   );
 };

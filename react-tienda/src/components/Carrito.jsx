@@ -6,6 +6,8 @@ import "./Carrito.css";
 import { categorias } from "../data/categorias";
 import { productos } from "../data/productos";
 import ModalCarrito from "./ModalCarrito"; // Importar ModalCarrito
+import "./Carrito.css"; 
+
 
 const Carrito = () => {
   const navigate = useNavigate();
@@ -39,7 +41,9 @@ const Carrito = () => {
   };
 
   const handleCategoriaClick = (nombreCategoria) => {
-    setCategoriaSeleccionada((prev) => (prev === nombreCategoria ? null : nombreCategoria));
+    setCategoriaSeleccionada((prev) =>
+      prev === nombreCategoria ? null : nombreCategoria
+    );
   };
 
   const handleSearchChange = (event) => {
@@ -48,7 +52,9 @@ const Carrito = () => {
 
   const productosFiltrados = productos.filter((producto) => {
     const categoria = categorias.find((cat) => cat.id === producto.id_categoria);
-    const matchesCategoria = categoriaSeleccionada ? categoria.nombre === categoriaSeleccionada : true;
+    const matchesCategoria = categoriaSeleccionada
+      ? categoria.nombre === categoriaSeleccionada
+      : true;
     const matchesBusqueda =
       producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
       producto.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
@@ -57,7 +63,9 @@ const Carrito = () => {
 
   const agregarAlCarrito = () => {
     setCarrito((prevCarrito) => {
-      const productoExistente = prevCarrito.find((item) => item.id === productoSeleccionado.id);
+      const productoExistente = prevCarrito.find(
+        (item) => item.id === productoSeleccionado.id
+      );
       if (productoExistente) {
         if (productoExistente.cantidad + cantidad <= 5) {
           return prevCarrito.map((item) =>
@@ -83,7 +91,10 @@ const Carrito = () => {
   };
 
   const handleCantidadChange = (event) => {
-    const nuevaCantidad = Math.min(Math.max(1, parseInt(event.target.value, 10)), 5);
+    const nuevaCantidad = Math.min(
+      Math.max(1, parseInt(event.target.value, 10)),
+      5
+    );
     setCantidad(nuevaCantidad);
   };
 
@@ -112,6 +123,11 @@ const Carrito = () => {
     );
   };
 
+  // Nueva función para ir al PanelUsuario
+  const handleIrAlPanelUsuario = () => {
+    navigate("/panel-usuario");
+  };
+
   return (
     <>
       <header className="header fixed-top">
@@ -132,8 +148,16 @@ const Carrito = () => {
                 onClick={() => setShowCarritoModal(true)} // Mostrar modal carrito
               />
               <span className="carrito-counter">{contarProductosCarrito()}</span>
-              <FontAwesomeIcon icon={faUser} className="icono-usuario mx-2" />
-              <button className="btn btn-danger btn-sm ms-3" onClick={handleCerrarSesion}>
+              {/* Ícono de usuario con el evento onClick para navegar al panel de usuario */}
+              <FontAwesomeIcon
+                icon={faUser}
+                className="icono-usuario mx-2"
+                onClick={handleIrAlPanelUsuario}
+              />
+              <button
+                className="btn btn-danger btn-sm ms-3"
+                onClick={handleCerrarSesion}
+              >
                 Cerrar sesión
               </button>
             </div>
@@ -143,7 +167,11 @@ const Carrito = () => {
               {categorias.map((categoria) => (
                 <span
                   key={categoria.id}
-                  className={`categoria ${categoriaSeleccionada === categoria.nombre ? "selected" : ""}`}
+                  className={`categoria ${
+                    categoriaSeleccionada === categoria.nombre
+                      ? "selected"
+                      : ""
+                  }`}
                   onClick={() => handleCategoriaClick(categoria.nombre)}
                 >
                   {categoria.nombre}
@@ -160,12 +188,19 @@ const Carrito = () => {
             productosFiltrados.map((producto) => (
               <div key={producto.id} className="col-md-4 mb-4">
                 <div className="card producto-card">
-                  <img src={producto.img} className="card-img-top" alt={producto.nombre} />
+                  <img
+                    src={producto.img}
+                    className="card-img-top"
+                    alt={producto.nombre}
+                  />
                   <div className="card-body">
                     <h5 className="card-title">{producto.nombre}</h5>
                     <p className="card-text">{producto.descripcion}</p>
                     <h6 className="text-primary">${producto.precio}</h6>
-                    <button className="btn btn-success w-100" onClick={() => handleAñadirAlCarrito(producto)}>
+                    <button
+                      className="btn btn-success w-100"
+                      onClick={() => handleAñadirAlCarrito(producto)}
+                    >
                       Añadir al carrito
                     </button>
                   </div>
@@ -173,19 +208,32 @@ const Carrito = () => {
               </div>
             ))
           ) : (
-            <p className="text-center w-100">No se encontraron productos que coincidan con esa búsqueda.</p>
+            <p className="text-center w-100">
+              No se encontraron productos que coincidan con esa búsqueda.
+            </p>
           )}
         </div>
       </main>
 
       {/* Modal de cantidad */}
       {showModal && (
-        <div className="modal fade show" style={{ display: "block" }} aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div
+          className="modal fade show"
+          style={{ display: "block" }}
+          aria-labelledby="exampleModalLabel"
+          aria-hidden="true"
+        >
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title" id="exampleModalLabel">Selecciona la cantidad</h5>
-                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+                <h5 className="modal-title" id="exampleModalLabel">
+                  Selecciona la cantidad
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowModal(false)}
+                ></button>
               </div>
               <div className="modal-body">
                 <div className="d-flex justify-content-center align-items-center">
@@ -197,7 +245,9 @@ const Carrito = () => {
                   />
                 </div>
                 <div className="d-flex justify-content-center align-items-center mt-3">
-                  <button className="btn-custom-rojo2" onClick={disminuirCantidad}>-</button>
+                  <button className="btn-custom-rojo2" onClick={disminuirCantidad}>
+                    -
+                  </button>
                   <input
                     type="number"
                     value={cantidad}
@@ -208,14 +258,20 @@ const Carrito = () => {
                     style={{ width: "60px", textAlign: "center" }}
                     readOnly
                   />
-                  <button className="btn btn-success" onClick={aumentarCantidad}>+</button>
+                  <button className="btn btn-success" onClick={aumentarCantidad}>
+                    +
+                  </button>
                 </div>
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-primary" onClick={agregarAlCarrito}>
                   Agregar al carrito
                 </button>
-                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowModal(false)}
+                >
                   Cerrar
                 </button>
               </div>
