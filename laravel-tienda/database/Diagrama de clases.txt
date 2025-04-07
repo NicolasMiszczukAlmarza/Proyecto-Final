@@ -1,0 +1,69 @@
++-----------------------------+
+|           User              |
++-----------------------------+
+| - id: int                   |
+| - name: string              |
+| - last_name: string         |
+| - email: string             |
+| - password: string          |
+| - address: string           |
+| - roles: string             |
+| - remember_token: string    |
+| - created_at: datetime      |
+| - updated_at: datetime      |
++-----------------------------+
+
++-----------------------------+
+|        Categoria            |
++-----------------------------+
+| - id: int                   |
+| - nombre: string            |
+| - img: string               |
+| - created_at: datetime      |
+| - updated_at: datetime      |
++-----------------------------+
+
++------------------------------------+
+|            Producto                |
++------------------------------------+
+| - id: int                          |
+| - nombre: string                   |
+| - stock: int                       |
+| - precio: float                    |
+| - descripcion: string              |
+| - img: string                      |
+| - id_categoria: int                |
++------------------------------------+
+| + perteneceA: Categoria            |
++------------------------------------+
+
++------------------------------------+
+|             Pedido                 |
++------------------------------------+
+| - id: int                          |
+| - order_id: string                 |
+| - id_producto: int                 |
+| - correo: string                   |
+| - cantidad: int                    |
+| - precioProducto: float            |
+| - descuento: float                 |
+| - precioTotal: float               |
+| - fecha: datetime                  |
++------------------------------------+
+| + contiene: Producto               |
++------------------------------------+
+
++------------------------------------+
+|       PersonalAccessToken          |
++------------------------------------+
+| - id: int                          |
+| - tokenable_type: string           |
+| - tokenable_id: int                |
+| - name: string                     |
+| - token: string                    |
+| - abilities: text                  |
+| - last_used_at: datetime           |
+| - expires_at: datetime             |
+| - created_at: datetime             |
+| - updated_at: datetime             |
++------------------------------------+
