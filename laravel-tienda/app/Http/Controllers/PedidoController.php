@@ -17,27 +17,46 @@ class PedidoController extends Controller
             'total'   => 'required|numeric'
         ]);
 
-        // Generar un identificador único para agrupar todos los productos de este pedido.
-        // Usamos uniqid; alternativamente podrías usar un UUID.
+        // Generar un identificador único para el pedido
         $orderId = uniqid('order_', true);
 
         try {
-            // Insertamos cada producto del carrito, asignándole el mismo order_id.
+            // Insertar cada producto del carrito
             foreach ($data['carrito'] as $producto) {
+                if (!isset($producto['id']) || !isset($producto['cantidad']) || !isset($producto['precio'])) {
+                    return response()->json(['message' => 'Datos del producto incompletos.'], 422);
+                }
+
+                // Calcular el precio total por el número de unidades
+                $precioProducto = $producto['cantidad'] * $producto['precio'];
+
                 DB::table('pedidos')->insert([
-                    // Asumiendo que has agregado una columna "order_id" a la tabla pedidos.
-                    'order_id'    => $orderId,
-                    'id_producto' => $producto['id'],
-                    'correo'      => $data['correo'],
-                    'cantidad'    => $producto['cantidad'] ?? 1,
-                    'precio'      => $producto['precio'] ?? 0,
-                    // 'fecha' se asignará automáticamente usando CURRENT_TIMESTAMP (según la definición de la columna)
+                    'order_id'       => $orderId,
+                    'id_producto'    => $producto['id'],
+                    'correo'         => $data['correo'],
+                    'cantidad'       => $producto['cantidad'],
+                    'precioProducto' => $precioProducto,
+                    'descuento'      => 0,   // Inicialmente sin descuento
+                    'precioTotal'    => $data['total'],
+                    'fecha'          => now(),
                 ]);
             }
         } catch (Exception $e) {
-            return response()->json(['message' => 'Error al registrar el pedido: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Error al registrar el pedido: ' . $e->getMessage()], 500)
+                ->withHeaders([
+                    'Access-Control-Allow-Origin' => '*',
+                    'Access-Control-Allow-Methods' => 'POST, GET, OPTIONS, PUT, DELETE',
+                    'Access-Control-Allow-Headers' => 'Content-Type, X-Auth-Token, Authorization, Origin',
+                    'Access-Control-Allow-Credentials' => 'true',
+                ]);
         }
 
-        return response()->json(['message' => 'Pedido registrado exitosamente', 'order_id' => $orderId], 201);
+        return response()->json(['message' => 'Pedido registrado exitosamente', 'order_id' => $orderId], 201)
+            ->withHeaders([
+                'Access-Control-Allow-Origin' => '*',
+                'Access-Control-Allow-Methods' => 'POST, GET, OPTIONS, PUT, DELETE',
+                'Access-Control-Allow-Headers' => 'Content-Type, X-Auth-Token, Authorization, Origin',
+                'Access-Control-Allow-Credentials' => 'true',
+            ]);
     }
 }

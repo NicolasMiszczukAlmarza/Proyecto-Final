@@ -6,7 +6,6 @@ import "./Carrito.css";
 import { categorias } from "../data/categorias";
 import { productos } from "../data/productos";
 import ModalCarrito from "./ModalCarrito"; // Importar ModalCarrito
-import "./Carrito.css"; 
 
 
 const Carrito = () => {

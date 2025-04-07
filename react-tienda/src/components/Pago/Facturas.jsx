@@ -23,12 +23,13 @@ const Facturas = () => {
     doc.text('Detalles del Pedido:', 20, 90);
 
     carrito.forEach((producto, index) => {
+      const precioProducto = producto.cantidad * producto.precio;
       doc.setFont('Helvetica', 'normal');
-      doc.text(`- ${producto.nombre} (x${producto.cantidad}): ${producto.precio}€`, 20, 100 + index * 10);
+      doc.text(`- ${producto.nombre} (x${producto.cantidad}): ${precioProducto.toFixed(2)}€`, 20, 100 + index * 10);
     });
 
     doc.setFont('Helvetica', 'bold');
-    doc.text(`Total: ${total}€`, 20, 110 + carrito.length * 10);
+    doc.text(`Total: ${total.toFixed(2)}€`, 20, 110 + carrito.length * 10);
     doc.save('factura.pdf');
   };
 
@@ -43,21 +44,26 @@ const Facturas = () => {
           <tr>
             <th style={{ border: '1px solid black', padding: '8px' }}>Producto</th>
             <th style={{ border: '1px solid black', padding: '8px' }}>Cantidad</th>
-            <th style={{ border: '1px solid black', padding: '8px' }}>Precio</th>
+            <th style={{ border: '1px solid black', padding: '8px' }}>Precio Unitario</th>
+            <th style={{ border: '1px solid black', padding: '8px' }}>Precio Total</th>
           </tr>
         </thead>
         <tbody>
-          {carrito.map((producto, index) => (
-            <tr key={index}>
-              <td style={{ border: '1px solid black', padding: '8px' }}>{producto.nombre}</td>
-              <td style={{ border: '1px solid black', padding: '8px' }}>{producto.cantidad}</td>
-              <td style={{ border: '1px solid black', padding: '8px' }}>{producto.precio}€</td>
-            </tr>
-          ))}
+          {carrito.map((producto, index) => {
+            const precioProducto = producto.cantidad * producto.precio;
+            return (
+              <tr key={index}>
+                <td style={{ border: '1px solid black', padding: '8px' }}>{producto.nombre}</td>
+                <td style={{ border: '1px solid black', padding: '8px' }}>{producto.cantidad}</td>
+                <td style={{ border: '1px solid black', padding: '8px' }}>{producto.precio.toFixed(2)}€</td>
+                <td style={{ border: '1px solid black', padding: '8px' }}>{precioProducto.toFixed(2)}€</td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
       <br></br>
-      <h3>Total: {total}€</h3>
+      <h3>Total: {total.toFixed(2)}€</h3>
       <button onClick={generarPDF} className="btn-pdf">Generar PDF</button>
       <button onClick={() => navigate('/carrito')} className="btn-volver">Volver al Carrito</button>
     </div>

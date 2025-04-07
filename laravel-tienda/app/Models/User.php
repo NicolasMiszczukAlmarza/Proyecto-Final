@@ -2,45 +2,46 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Carbon\Carbon;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 
+/**
+ * Class User
+ * 
+ * @property int $id
+ * @property string $name
+ * @property string $last_name
+ * @property string $email
+ * @property string $password
+ * @property string $address
+ * @property string $roles
+ * @property string $remember_token
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ *
+ * @package App\Models
+ */
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    protected $table = 'users';
 
-    /**
-     * Los atributos que se pueden asignar masivamente.
-     *
-     * @var array<int, string>
-     */
+    protected $hidden = [
+        'password',
+        'remember_token'
+    ];
+
     protected $fillable = [
         'name',
         'last_name',
         'email',
         'password',
         'address',
-        'roles', // Se agrega el campo roles
+        'roles',
+        'remember_token'
     ];
 
-    /**
-     * Los atributos que deberían ser ocultos para la serialización.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    /**
-     * Los atributos que deberían ser convertidos a otro tipo.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
+    public function pedidos()
+    {
+        return $this->hasMany(Pedido::class, 'user_id');
+    }
 }

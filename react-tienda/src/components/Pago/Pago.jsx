@@ -15,7 +15,28 @@ const Pago = () => {
   const [fechaCaducidad, setFechaCaducidad] = useState('');
   const [cvv, setCvv] = useState('');
 
+  // Obtener el correo del almacenamiento local
   const correo = localStorage.getItem('userEmail');
+
+  // Validación del correo
+  if (!correo) {
+    toast.error('No se encontró el correo del usuario. Inicie sesión nuevamente.', {
+      position: 'top-center',
+      autoClose: 3000,
+      theme: 'colored',
+    });
+    navigate('/login');
+    return null;
+  }
+
+  // Calcular el precio total teniendo en cuenta el descuento
+  const calcularPrecioTotal = () => {
+    const subtotal = carrito.reduce((total, item) => total + item.precio * item.cantidad, 0);
+    const descuento = subtotal >= 1500 ? subtotal * 0.10 : 0;
+    return subtotal - descuento;
+  };
+
+  const precioTotal = calcularPrecioTotal();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,10 +45,6 @@ const Pago = () => {
       toast.error('Por favor, complete todos los datos de la tarjeta.', {
         position: 'top-center',
         autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
         theme: 'colored',
       });
       return;
@@ -36,51 +53,42 @@ const Pago = () => {
     try {
       const csrfResponse = await fetch('http://localhost:8000/sanctum/csrf-cookie', {
         method: 'GET',
-        credentials: 'include'
+        credentials: 'include',
       });
       if (!csrfResponse.ok) {
         throw new Error('No se pudo obtener el token CSRF');
       }
-    } catch (error) {
-      console.error('Error al obtener CSRF token:', error);
-      toast.error('Error al conectar con el servidor (CSRF)', {
-        position: 'top-center',
-        autoClose: 3000,
-        hideProgressBar: false,
-        theme: 'colored',
-      });
-      return;
-    }
 
-    const pedidoData = {
-      correo,
-      carrito,
-      total: totalFinal
-    };
+      const pedidoData = {
+        correo,
+        carrito,
+        total: precioTotal,  // Enviamos el precio total calculado
+      };
 
-    try {
       const response = await fetch('http://localhost:8000/pedidos', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
         credentials: 'include',
-        body: JSON.stringify(pedidoData)
+        body: JSON.stringify(pedidoData),
       });
+
       const result = await response.json();
       if (response.ok) {
         toast.success('Pedido realizado con éxito', {
           position: 'top-center',
           autoClose: 3000,
-          hideProgressBar: false,
           theme: 'colored',
         });
         setTimeout(() => {
-          navigate('/factura', { state: { correo, carrito, total: totalFinal } });
+          navigate('/factura', { state: { correo, carrito, total: precioTotal } });
         }, 3500);
       } else {
-        toast.error('Error al registrar el pedido: ' + (result.message || 'Error desconocido'), {
+        toast.error(`Error al registrar el pedido: ${result.message || 'Error desconocido'}`, {
           position: 'top-center',
           autoClose: 3000,
-          hideProgressBar: false,
           theme: 'colored',
         });
       }
@@ -89,7 +97,6 @@ const Pago = () => {
       toast.error('Error al conectar con el servidor', {
         position: 'top-center',
         autoClose: 3000,
-        hideProgressBar: false,
         theme: 'colored',
       });
     }
@@ -107,7 +114,7 @@ const Pago = () => {
       <form className="pago-form" onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="monto">Cantidad a pagar:</label>
-          <input type="text" id="monto" value={`${totalFinal.toFixed(2)}€`} readOnly />
+          <input type="text" id="monto" value={`${precioTotal.toFixed(2)}€`} readOnly />
         </div>
         <div className="form-group">
           <label htmlFor="titular">Titular de la tarjeta:</label>
