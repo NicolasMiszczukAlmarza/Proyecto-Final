@@ -29,15 +29,6 @@ const Pago = () => {
     return null;
   }
 
-  // Calcular el precio total teniendo en cuenta el descuento
-  const calcularPrecioTotal = () => {
-    const subtotal = carrito.reduce((total, item) => total + item.precio * item.cantidad, 0);
-    const descuento = subtotal >= 1500 ? subtotal * 0.10 : 0;
-    return subtotal - descuento;
-  };
-
-  const precioTotal = calcularPrecioTotal();
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -62,7 +53,7 @@ const Pago = () => {
       const pedidoData = {
         correo,
         carrito,
-        total: precioTotal,  // Enviamos el precio total calculado
+        total: totalFinal,  // Usamos el total con descuento directamente
       };
 
       const response = await fetch('http://localhost:8000/pedidos', {
@@ -83,7 +74,7 @@ const Pago = () => {
           theme: 'colored',
         });
         setTimeout(() => {
-          navigate('/factura', { state: { correo, carrito, total: precioTotal } });
+          navigate('/factura', { state: { correo, carrito, total: totalFinal } });
         }, 3500);
       } else {
         toast.error(`Error al registrar el pedido: ${result.message || 'Error desconocido'}`, {
@@ -114,7 +105,7 @@ const Pago = () => {
       <form className="pago-form" onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="monto">Cantidad a pagar:</label>
-          <input type="text" id="monto" value={`${precioTotal.toFixed(2)}€`} readOnly />
+          <input type="text" id="monto" value={`${totalFinal.toFixed(2)}€`} readOnly />
         </div>
         <div className="form-group">
           <label htmlFor="titular">Titular de la tarjeta:</label>

@@ -5,7 +5,7 @@ import jsPDF from 'jspdf';
 const Facturas = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { correo, carrito, total } = location.state;
+  const { correo, carrito, total, descuentoAplicado } = location.state;
 
   const generarPDF = () => {
     const doc = new jsPDF();
@@ -13,12 +13,12 @@ const Facturas = () => {
     const imgWidth = 80;
     const imgHeight = 40;
     const xPos = (pageWidth - imgWidth) / 2;
-    doc.addImage('public/img/logo/logo.jpg', 'JPEG', xPos, 10, imgWidth, imgHeight); // Imagen centrada
+    doc.addImage('public/img/logo/logo.jpg', 'JPEG', xPos, 10, imgWidth, imgHeight);
     doc.setFont('Helvetica', 'bold');
     doc.text('Factura de Compra', pageWidth / 2, 60, { align: 'center' });
     doc.text('Correo: ', 20, 80);
     doc.setFont('Helvetica', 'normal');
-    doc.text(correo, 50, 80); // Espacio mayor después de 'Correo:'
+    doc.text(correo, 50, 80);
     doc.setFont('Helvetica', 'bold');
     doc.text('Detalles del Pedido:', 20, 90);
 
@@ -28,8 +28,15 @@ const Facturas = () => {
       doc.text(`- ${producto.nombre} (x${producto.cantidad}): ${precioProducto.toFixed(2)}€`, 20, 100 + index * 10);
     });
 
+    if (descuentoAplicado > 0) {
+      doc.setFont('Helvetica', 'bold');
+      doc.setTextColor(0, 128, 0); // Color verde
+      doc.text(`Descuento aplicado: -${descuentoAplicado.toFixed(2)}€`, 20, 110 + carrito.length * 10);
+      doc.setTextColor(0, 0, 0); // Reset color
+    }
+
     doc.setFont('Helvetica', 'bold');
-    doc.text(`Total: ${total.toFixed(2)}€`, 20, 110 + carrito.length * 10);
+    doc.text(`Total: ${total.toFixed(2)}€`, 20, 120 + carrito.length * 10);
     doc.save('factura.pdf');
   };
 
@@ -63,6 +70,9 @@ const Facturas = () => {
         </tbody>
       </table>
       <br></br>
+      {descuentoAplicado > 0 && (
+        <h3 style={{ color: 'green' }}>Descuento aplicado: -{descuentoAplicado.toFixed(2)}€</h3>
+      )}
       <h3>Total: {total.toFixed(2)}€</h3>
       <button onClick={generarPDF} className="btn-pdf">Generar PDF</button>
       <button onClick={() => navigate('/carrito')} className="btn-volver">Volver al Carrito</button>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import { useNavigate } from "react-router-dom"; // Usamos useNavigate para redirigir
+import { useNavigate } from "react-router-dom"; 
 import './ModalCarrito.css';
 
 const ModalCarrito = ({ carrito, onCerrar, onEliminarProducto, onActualizarCantidad }) => {
@@ -12,8 +12,8 @@ const ModalCarrito = ({ carrito, onCerrar, onEliminarProducto, onActualizarCanti
   const [totalConIva, setTotalConIva] = useState(0);
   const [descuentoAplicado, setDescuentoAplicado] = useState(0);
   const [totalFinal, setTotalFinal] = useState(0);
+  const [mensajeDescuento, setMensajeDescuento] = useState("");
 
-  // Función para generar el código de descuento aleatorio
   const generarCodigoDescuento = () => {
     const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const numeros = '0123456789';
@@ -38,25 +38,25 @@ const ModalCarrito = ({ carrito, onCerrar, onEliminarProducto, onActualizarCanti
       0
     );
     const totalConIvaCalculado = total * 1.21;
+
+    if (totalConIvaCalculado >= 1500) {
+      const descuento = totalConIvaCalculado * 0.30;
+      setDescuentoAplicado(descuento);
+      setTotalFinal(totalConIvaCalculado - descuento);
+      setMensajeDescuento("Descuento del 30% aplicado automáticamente");
+    } else {
+      const faltante = 1500 - totalConIvaCalculado;
+      setDescuentoAplicado(0);
+      setTotalFinal(totalConIvaCalculado);
+      setMensajeDescuento(`Te falta ${faltante.toFixed(2)}€ para llegar al descuento del 30%`);
+    }
+
     setTotalSinIva(total);
     setTotalConIva(totalConIvaCalculado);
-    setTotalFinal(totalConIvaCalculado);
   }, [carrito, cantidad]);
 
   const realizarPedido = () => {
     navigate("/pago", { state: { totalFinal, carrito } });
-  };
-
-  const manejarCodigoDescuento = () => {
-    if (codigoDescuento === codigoGenerado) {
-      const descuento = totalConIva * 0.10;
-      const descuentoFinal = totalConIva - descuento;
-      setDescuentoAplicado(descuento);
-      setTotalFinal(descuentoFinal);
-      alert('Descuento aplicado correctamente');
-    } else {
-      alert('Código de descuento inválido');
-    }
   };
 
   return (
@@ -68,6 +68,11 @@ const ModalCarrito = ({ carrito, onCerrar, onEliminarProducto, onActualizarCanti
             <button type="button" className="btn-close" onClick={onCerrar}></button>
           </div>
           <div className="modal-body">
+            {mensajeDescuento && (
+              <div className="alert alert-info text-center mb-3">
+                {mensajeDescuento}
+              </div>
+            )}
             {carrito.length === 0 ? (
               <p>No tienes productos en el carrito.</p>
             ) : (
@@ -87,9 +92,10 @@ const ModalCarrito = ({ carrito, onCerrar, onEliminarProducto, onActualizarCanti
                       <input
                         type="number"
                         min="1"
+                        max="5"
                         value={cantidad[producto.id] || producto.cantidad}
                         onChange={(e) => {
-                          const nuevaCantidad = parseInt(e.target.value, 10);
+                          const nuevaCantidad = Math.min(5, parseInt(e.target.value, 10));
                           setCantidad(prevCantidad => ({
                             ...prevCantidad,
                             [producto.id]: nuevaCantidad
@@ -104,32 +110,13 @@ const ModalCarrito = ({ carrito, onCerrar, onEliminarProducto, onActualizarCanti
                     </button>
                   </div>
                 ))}
-                {totalConIva > 1500 && (
-                  <div className="mt-3">
-                    <p><strong>Código de descuento: {codigoGenerado}</strong></p>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Ingresa tu código de descuento"
-                      value={codigoDescuento}
-                      onChange={(e) => setCodigoDescuento(e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-secondary mt-2 w-100"
-                      onClick={manejarCodigoDescuento}
-                    >
-                      Aplicar Descuento
-                    </button>
-                  </div>
-                )}
                 <div className="mt-3 d-flex justify-content-between">
                   <h6>Total con IVA:</h6>
                   <h6>{totalConIva.toFixed(2)}€</h6>
                 </div>
                 {descuentoAplicado > 0 && (
                   <div className="mt-3 d-flex justify-content-between text-success">
-                    <h6>Descuento:</h6>
+                    <h6>Descuento aplicado:</h6>
                     <h6>-{descuentoAplicado.toFixed(2)}€</h6>
                   </div>
                 )}
@@ -141,9 +128,6 @@ const ModalCarrito = ({ carrito, onCerrar, onEliminarProducto, onActualizarCanti
             )}
           </div>
           <div className="modal-footer">
-            <button className="btn btn-danger w-100" onClick={() => onEliminarProducto()}>
-              Vaciar Carrito
-            </button>
             <button className="btn btn-primary w-100 mt-2" onClick={realizarPedido}>
               Realizar Pedido
             </button>
