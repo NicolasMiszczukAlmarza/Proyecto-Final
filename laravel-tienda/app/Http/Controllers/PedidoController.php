@@ -14,7 +14,8 @@ class PedidoController extends Controller
         $data = $request->validate([
             'correo'  => 'required|email',
             'carrito' => 'required|array',
-            'total'   => 'required|numeric'
+            'total'   => 'required|numeric',
+            'descuento' => 'nullable|numeric'  // Acepta el descuento como numérico
         ]);
 
         // Generar un identificador único para el pedido
@@ -36,7 +37,7 @@ class PedidoController extends Controller
                     'correo'         => $data['correo'],
                     'cantidad'       => $producto['cantidad'],
                     'precioProducto' => $precioProducto,
-                    'descuento'      => 0,   // Inicialmente sin descuento
+                    'descuento'      => $data['descuento'] ?? 0,   // Guarda el descuento o 0 si no existe
                     'precioTotal'    => $data['total'],
                     'fecha'          => now(),
                 ]);
