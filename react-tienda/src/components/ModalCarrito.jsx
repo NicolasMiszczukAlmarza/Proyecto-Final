@@ -56,7 +56,7 @@ const ModalCarrito = ({ carrito, onCerrar, onEliminarProducto, onActualizarCanti
   }, [carrito, cantidad]);
 
   const realizarPedido = () => {
-    navigate("/pago", { state: { totalFinal, carrito } });
+    navigate("/pago", { state: { totalFinal, carrito, descuentoAplicado } });
   };
 
   return (

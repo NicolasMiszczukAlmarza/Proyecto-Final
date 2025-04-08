@@ -8,7 +8,7 @@ import './Pago.css';
 const Pago = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { totalFinal, carrito } = location.state;
+  const { totalFinal, carrito, descuentoAplicado } = location.state;
 
   const [titular, setTitular] = useState('');
   const [numeroTarjeta, setNumeroTarjeta] = useState('');
@@ -54,6 +54,7 @@ const Pago = () => {
         correo,
         carrito,
         total: totalFinal,  // Usamos el total con descuento directamente
+        descuento: descuentoAplicado  // Añadimos el descuento al objeto
       };
 
       const response = await fetch('http://localhost:8000/pedidos', {
@@ -74,7 +75,7 @@ const Pago = () => {
           theme: 'colored',
         });
         setTimeout(() => {
-          navigate('/factura', { state: { correo, carrito, total: totalFinal } });
+          navigate('/factura', { state: { correo, carrito, total: totalFinal, descuentoAplicado } });
         }, 3500);
       } else {
         toast.error(`Error al registrar el pedido: ${result.message || 'Error desconocido'}`, {
