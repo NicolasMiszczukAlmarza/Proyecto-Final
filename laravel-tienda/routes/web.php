@@ -4,72 +4,85 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\PedidoController;  // Importamos el controlador
+use App\Http\Controllers\PedidoController;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
-// 📌 Agrupar rutas dentro del middleware 'web' para manejar sesiones correctamente
+// 📌 Middleware 'web' para sesiones y cookies
 Route::middleware(['web'])->group(function () {
 
-    // 📌 Obtener el token CSRF (necesario para sesiones con Sanctum)
+    // 📌 CSRF Token para uso con Sanctum
     Route::get('sanctum/csrf-cookie', [CsrfCookieController::class, 'show'])->name('csrf-cookie');
 
-    // 📌 Ruta para iniciar sesión con Laravel Sanctum
+    // 📌 Login de usuario
     Route::post('/login', function (Request $request) {
-        // Validar datos
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required'
         ]);
 
-        // Buscar usuario por email
         $user = User::where('email', $credentials['email'])->first();
 
-        // Verificar si el usuario existe y si la contraseña es correcta
         if (!$user || !Hash::check($credentials['password'], $user->password)) {
             return response()->json(['message' => 'Usuario no registrado o contraseña incorrecta'], 401);
         }
 
-        // Autenticar usuario con Sanctum (basado en sesión)
         Auth::login($user, true);
 
         return response()->json([
             'message' => 'Login exitoso',
             'user' => Auth::user(),
-        ], 200);
+        ]);
     })->name('login');
 
-    // 📌 Ruta para cerrar sesión
+    // 📌 Cierre de sesión
     Route::post('/logout', function () {
         Auth::logout();
-        return response()->json(['message' => 'Logout exitoso'], 200);
+        return response()->json(['message' => 'Logout exitoso']);
     })->name('logout');
 
-    // 📌 Obtener el usuario autenticado
-    Route::get('/user', function (Request $request) {
-        return response()->json(Auth::user());
+    // 📌 Obtener datos del usuario autenticado (ruta '/user')
+    Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
+        // Esta ruta usa el middleware 'auth:sanctum' para asegurar que el usuario esté autenticado
+        return response()->json($request->user()); // Devuelve los datos del usuario autenticado
     })->name('user');
 
-    // 📌 Página de registro
-    Route::get('/register', function () {
-        return view('auth.register');
-    })->name('register');
+    // 📌 Obtener datos del usuario autenticado (ruta '/users') - alternativa
+    Route::middleware(['auth:sanctum'])->get('/users', function (Request $request) {
+        // Ahora la ruta '/users' devuelve los datos del usuario autenticado
+        return response()->json($request->user()); // Devuelve los datos del usuario autenticado
+    })->name('users');
 
-    // 📌 Procesar el registro del usuario
+    // 📌 Registro
+    Route::get('/register', fn () => view('auth.register'))->name('register');
     Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
 
-    // 📌 Ruta raíz
-    Route::get('/', function () {
-        return view('welcome'); // Página principal
-    });
+    // 📌 Página principal
+    Route::get('/', fn () => view('welcome'));
 
-    // 📌 Ruta para manejar errores si se hace un GET en /login
-    Route::get('/login', function () {
-        return response()->json(['message' => 'Esta ruta solo acepta POST'], 405);
-    });
+    // 📌 Proteger GET en /login
+    Route::get('/login', fn () => response()->json(['message' => 'Esta ruta solo acepta POST'], 405));
 
-    // 📌 Ruta para registrar pedidos usando el controlador
-    Route::post('/pedidos', [PedidoController::class, 'store']);
+    // 📌 Guardar pedido
+    Route::post('/pedidos', [PedidoController::class, 'store'])->middleware('auth:sanctum');
+
+    // 📌 Actualizar datos del usuario autenticado
+    Route::post('/actualizar-usuario', function (Request $request) {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'address' => 'nullable|string|max:255',
+        ]);
+
+        $user->update([
+            'name' => $validated['name'],
+            'last_name' => $validated['last_name'],
+            'address' => $validated['address'],
+        ]);
+
+        return response()->json(['message' => 'Usuario actualizado correctamente']);
+    })->middleware('auth:sanctum');
 });
