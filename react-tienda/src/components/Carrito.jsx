@@ -1,12 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart, faUser } from "@fortawesome/free-solid-svg-icons";
 import "./Carrito.css";
 import { categorias } from "../data/categorias";
 import { productos } from "../data/productos";
-import ModalCarrito from "./ModalCarrito"; // Importar ModalCarrito
-
+import ModalCarrito from "./ModalCarrito";
 
 const Carrito = () => {
   const navigate = useNavigate();
@@ -16,7 +15,15 @@ const Carrito = () => {
   const [showModal, setShowModal] = useState(false);
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
   const [cantidad, setCantidad] = useState(1);
-  const [showCarritoModal, setShowCarritoModal] = useState(false); // Estado para mostrar el ModalCarrito
+  const [showCarritoModal, setShowCarritoModal] = useState(false);
+
+  // 🔐 Verificar usuario logueado y mostrar mensaje
+  useEffect(() => {
+    const data = localStorage.getItem("usuario");
+    if (data) {
+      console.log("✅ Login exitoso");
+    }
+  }, []);
 
   const handleCerrarSesion = async () => {
     try {
@@ -61,23 +68,21 @@ const Carrito = () => {
   });
 
   const agregarAlCarrito = () => {
-    setCarrito((prevCarrito) => {
-      const productoExistente = prevCarrito.find(
-        (item) => item.id === productoSeleccionado.id
-      );
-      if (productoExistente) {
-        if (productoExistente.cantidad + cantidad <= 5) {
-          return prevCarrito.map((item) =>
+    setCarrito((prev) => {
+      const existente = prev.find((item) => item.id === productoSeleccionado.id);
+      if (existente) {
+        if (existente.cantidad + cantidad <= 5) {
+          return prev.map((item) =>
             item.id === productoSeleccionado.id
               ? { ...item, cantidad: item.cantidad + cantidad }
               : item
           );
         } else {
-          alert("No puedes agregar más de 5 unidades de este producto.");
-          return prevCarrito;
+          alert("No puedes agregar más de 5 unidades.");
+          return prev;
         }
       } else {
-        return [...prevCarrito, { ...productoSeleccionado, cantidad }];
+        return [...prev, { ...productoSeleccionado, cantidad }];
       }
     });
     setShowModal(false);
@@ -89,12 +94,9 @@ const Carrito = () => {
     setShowModal(true);
   };
 
-  const handleCantidadChange = (event) => {
-    const nuevaCantidad = Math.min(
-      Math.max(1, parseInt(event.target.value, 10)),
-      5
-    );
-    setCantidad(nuevaCantidad);
+  const handleCantidadChange = (e) => {
+    const nueva = Math.min(Math.max(1, parseInt(e.target.value, 10)), 5);
+    setCantidad(nueva);
   };
 
   const aumentarCantidad = () => {
@@ -110,19 +112,17 @@ const Carrito = () => {
   };
 
   const eliminarProductoCarrito = (id) => {
-    setCarrito((prevCarrito) => prevCarrito.filter((producto) => producto.id !== id));
+    setCarrito((prev) => prev.filter((item) => item.id !== id));
   };
 
-  // Función para actualizar la cantidad de un producto en el carrito
   const actualizarCantidad = (id, nuevaCantidad) => {
-    setCarrito((prevCarrito) =>
-      prevCarrito.map((producto) =>
-        producto.id === id ? { ...producto, cantidad: nuevaCantidad } : producto
+    setCarrito((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, cantidad: nuevaCantidad } : item
       )
     );
   };
 
-  // Nueva función para ir al PanelUsuario
   const handleIrAlPanelUsuario = () => {
     navigate("/panel-usuario");
   };
@@ -132,7 +132,7 @@ const Carrito = () => {
       <header className="header fixed-top">
         <div className="container-fluid d-flex flex-column align-items-center p-3">
           <div className="d-flex justify-content-between w-100 align-items-center">
-            <img src="public/img/logo/logo.jpg" alt="Logo" className="logo" />
+            <img src="/img/logo/logo.jpg" alt="Logo" className="logo" />
             <input
               type="text"
               className="form-control search-bar mx-3"
@@ -144,10 +144,9 @@ const Carrito = () => {
               <FontAwesomeIcon
                 icon={faShoppingCart}
                 className="icono-carrito mx-2"
-                onClick={() => setShowCarritoModal(true)} // Mostrar modal carrito
+                onClick={() => setShowCarritoModal(true)}
               />
               <span className="carrito-counter">{contarProductosCarrito()}</span>
-              {/* Ícono de usuario con el evento onClick para navegar al panel de usuario */}
               <FontAwesomeIcon
                 icon={faUser}
                 className="icono-usuario mx-2"
@@ -163,17 +162,15 @@ const Carrito = () => {
           </div>
           <nav className="categorias-menu w-100">
             <div className="container-fluid categorias-container d-flex justify-content-center">
-              {categorias.map((categoria) => (
+              {categorias.map((cat) => (
                 <span
-                  key={categoria.id}
+                  key={cat.id}
                   className={`categoria ${
-                    categoriaSeleccionada === categoria.nombre
-                      ? "selected"
-                      : ""
+                    categoriaSeleccionada === cat.nombre ? "selected" : ""
                   }`}
-                  onClick={() => handleCategoriaClick(categoria.nombre)}
+                  onClick={() => handleCategoriaClick(cat.nombre)}
                 >
-                  {categoria.nombre}
+                  {cat.nombre}
                 </span>
               ))}
             </div>
@@ -187,11 +184,7 @@ const Carrito = () => {
             productosFiltrados.map((producto) => (
               <div key={producto.id} className="col-md-4 mb-4">
                 <div className="card producto-card">
-                  <img
-                    src={producto.img}
-                    className="card-img-top"
-                    alt={producto.nombre}
-                  />
+                  <img src={producto.img} className="card-img-top" alt={producto.nombre} />
                   <div className="card-body">
                     <h5 className="card-title">{producto.nombre}</h5>
                     <p className="card-text">{producto.descripcion}</p>
@@ -216,37 +209,22 @@ const Carrito = () => {
 
       {/* Modal de cantidad */}
       {showModal && (
-        <div
-          className="modal fade show"
-          style={{ display: "block" }}
-          aria-labelledby="exampleModalLabel"
-          aria-hidden="true"
-        >
+        <div className="modal fade show" style={{ display: "block" }}>
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title" id="exampleModalLabel">
-                  Selecciona la cantidad
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowModal(false)}
-                ></button>
+                <h5 className="modal-title">Selecciona la cantidad</h5>
+                <button type="button" className="btn-close" onClick={() => setShowModal(false)} />
               </div>
-              <div className="modal-body">
-                <div className="d-flex justify-content-center align-items-center">
-                  <img
-                    src={productoSeleccionado.img}
-                    alt={productoSeleccionado.nombre}
-                    className="img-fluid"
-                    style={{ width: "100px", height: "100px", objectFit: "cover" }}
-                  />
-                </div>
+              <div className="modal-body text-center">
+                <img
+                  src={productoSeleccionado.img}
+                  alt={productoSeleccionado.nombre}
+                  className="img-fluid"
+                  style={{ width: "100px", height: "100px", objectFit: "cover" }}
+                />
                 <div className="d-flex justify-content-center align-items-center mt-3">
-                  <button className="btn-custom-rojo2" onClick={disminuirCantidad}>
-                    -
-                  </button>
+                  <button className="btn btn-secondary" onClick={disminuirCantidad}>-</button>
                   <input
                     type="number"
                     value={cantidad}
@@ -257,20 +235,14 @@ const Carrito = () => {
                     style={{ width: "60px", textAlign: "center" }}
                     readOnly
                   />
-                  <button className="btn btn-success" onClick={aumentarCantidad}>
-                    +
-                  </button>
+                  <button className="btn btn-success" onClick={aumentarCantidad}>+</button>
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-primary" onClick={agregarAlCarrito}>
+                <button className="btn btn-primary" onClick={agregarAlCarrito}>
                   Agregar al carrito
                 </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowModal(false)}
-                >
+                <button className="btn btn-secondary" onClick={() => setShowModal(false)}>
                   Cerrar
                 </button>
               </div>
@@ -279,7 +251,7 @@ const Carrito = () => {
         </div>
       )}
 
-      {/* Modal de carrito */}
+      {/* Modal del carrito */}
       {showCarritoModal && (
         <ModalCarrito
           carrito={carrito}

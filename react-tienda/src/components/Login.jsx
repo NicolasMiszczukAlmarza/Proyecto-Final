@@ -3,28 +3,23 @@ import { Link, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Login = () => {
-  // Estados para el formulario y el mensaje de error
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
-  // Manejador para el submit del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Formulario enviado');
-
-    // Limpiar mensaje de error antes de intentar nuevamente
     setErrorMessage('');
 
     try {
-      // 1️⃣ Obtener el token CSRF antes de hacer login
+      // 1️⃣ Obtener token CSRF
       await fetch('http://localhost:8000/sanctum/csrf-cookie', {
         method: 'GET',
         credentials: 'include',
       });
 
-      // 2️⃣ Enviar la solicitud de login
+      // 2️⃣ Enviar login
       const response = await fetch('http://localhost:8000/login', {
         method: 'POST',
         headers: {
@@ -34,17 +29,14 @@ const Login = () => {
         body: JSON.stringify({ email, password }),
       });
 
-      console.log('Respuesta del servidor:', response);
-
       if (response.ok) {
         const data = await response.json();
-        console.log(data.message);
 
-        // Guardamos el correo en localStorage y redirigimos
-        localStorage.setItem('userEmail', email);
+        // ✅ Guardar datos del usuario (no solo el correo)
+        localStorage.setItem('usuario', JSON.stringify(data.user));
+
         navigate('/carrito');
       } else {
-        // Si la respuesta no es exitosa, mostrar mensaje de error
         setErrorMessage('Usuario no registrado y/o contraseña incorrecta');
       }
     } catch (error) {
@@ -64,7 +56,6 @@ const Login = () => {
             <h2 className="fw-bold" style={{ color: '#000' }}>Iniciar Sesión</h2>
           </div>
 
-          {/* 🔴 Mostrar mensaje de error en rojo si existe */}
           {errorMessage && (
             <div className="alert alert-danger text-center fw-bold" role="alert">
               {errorMessage}
@@ -98,7 +89,6 @@ const Login = () => {
           </form>
           <div className="text-center mt-3">
             <p>¿No tienes cuenta? <Link to="/registro">¡Créala aquí!</Link></p>
-          
           </div>
         </div>
       </div>

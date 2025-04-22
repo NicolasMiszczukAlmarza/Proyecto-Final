@@ -53,4 +53,12 @@
     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     flex-grow: 1;
   }
+
+  .panel-main-wrapper {
+    background-color: #fd7e14;
+    color: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+  }
+  
   
