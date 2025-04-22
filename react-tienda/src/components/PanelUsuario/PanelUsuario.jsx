@@ -10,9 +10,9 @@ const PanelUsuario = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const data = localStorage.getItem('usuario');
-    if (data) {
-      const user = JSON.parse(data);
+    const storedUser = localStorage.getItem('usuario');
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
       setUsuario(user);
       setFormData({
         name: user.name,
@@ -24,127 +24,143 @@ const PanelUsuario = () => {
     }
   }, [navigate]);
 
-  const handleClick = (item) => {
-    if (item === 'Ir al carrito') {
-      navigate('/carrito');
-    } else if (item === 'Cerrar sesión') {
+  const handleClick = (opcion) => {
+    if (opcion === 'Ir al carrito') return navigate('/carrito');
+    if (opcion === 'Cerrar sesión') {
       localStorage.removeItem('usuario');
       navigate('/login');
     } else {
-      setSeleccion(item);
+      setSeleccion(opcion);
     }
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleImagenChange = (e) => {
-    const file = e.target.files[0];
-    setImagen(file);
+    setImagen(e.target.files[0]);
   };
 
   const handleActualizar = async () => {
     try {
-      const response = await fetch("http://localhost:8000/actualizar-usuario", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(formData),
+      await fetch('http://localhost:8000/sanctum/csrf-cookie', {
+        credentials: 'include',
       });
 
-      if (response.ok) {
-        const updatedUser = { ...usuario, ...formData };
-        localStorage.setItem("usuario", JSON.stringify(updatedUser));
-        setUsuario(updatedUser);
-        alert("Datos actualizados correctamente.");
-      } else {
-        alert("Error al actualizar.");
+      const xsrfToken = decodeURIComponent(
+        document.cookie
+          .split('; ')
+          .find(row => row.startsWith('XSRF-TOKEN='))
+          ?.split('=')[1] || ''
+      );
+
+      const formDataToSend = new FormData();
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('last_name', formData.last_name);
+      formDataToSend.append('address', formData.address);
+      if (imagen) formDataToSend.append('img', imagen);
+
+      const response = await fetch('http://localhost:8000/actualizar-usuario', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'X-XSRF-TOKEN': xsrfToken
+        },
+        body: formDataToSend,
+      });
+
+      const contentType = response.headers.get('content-type');
+      const isJson = contentType && contentType.includes('application/json');
+
+      if (response.status === 401) {
+        alert('⚠️ Tu sesión ha expirado. Por favor inicia sesión nuevamente.');
+        localStorage.removeItem('usuario');
+        navigate('/login');
+        return;
       }
-    } catch (error) {
-      console.error("Error actualizando datos:", error);
-      alert("Hubo un problema al actualizar los datos.");
+
+      if (!response.ok) {
+        const errorMsg = isJson ? (await response.json()).message : 'Error desconocido';
+        alert(`❌ Error al actualizar: ${errorMsg}`);
+        return;
+      }
+
+      const data = isJson ? await response.json() : {};
+      const updatedUser = { ...usuario, ...formData };
+      if (data.img) updatedUser.img = data.img;
+
+      localStorage.setItem('usuario', JSON.stringify(updatedUser));
+      setUsuario(updatedUser);
+      alert('✅ Datos actualizados correctamente.');
+    } catch (err) {
+      console.error('Error actualizando:', err);
+      alert('❌ Error al conectar con el servidor.');
     }
   };
 
-  const renderPerfil = () => {
-    if (!usuario) return <p className="text-center">Cargando datos del usuario...</p>;
-
-    return (
-      <div className="w-100" style={{ maxWidth: '500px' }}>
-        <div className="mb-3">
-          <label className="form-label fw-bold">Nombre</label>
-          <input className="form-control text-center" value={usuario.name} readOnly />
-        </div>
-        <div className="mb-3">
-          <label className="form-label fw-bold">Apellidos</label>
-          <input className="form-control text-center" value={usuario.last_name} readOnly />
-        </div>
-        <div className="mb-3">
-          <label className="form-label fw-bold">Dirección</label>
-          <input className="form-control text-center" value={usuario.address || 'No especificada'} readOnly />
-        </div>
-        <div className="mb-3">
-          <label className="form-label fw-bold">Correo electrónico</label>
-          <input className="form-control text-center" value={usuario.email} readOnly />
-        </div>
+  const renderPerfil = () => (
+    <div className="w-100" style={{ maxWidth: '500px' }}>
+      <div className="mb-3 text-center">
+        {usuario?.img && (
+          <img
+            src={`http://localhost:8000/${usuario.img}`}
+            alt="Perfil"
+            style={{ width: '120px', borderRadius: '50%' }}
+          />
+        )}
       </div>
-    );
-  };
+      <div className="mb-3">
+        <label className="form-label fw-bold">Nombre</label>
+        <input className="form-control text-center" value={usuario?.name || ''} readOnly />
+      </div>
+      <div className="mb-3">
+        <label className="form-label fw-bold">Apellidos</label>
+        <input className="form-control text-center" value={usuario?.last_name || ''} readOnly />
+      </div>
+      <div className="mb-3">
+        <label className="form-label fw-bold">Dirección</label>
+        <input className="form-control text-center" value={usuario?.address || 'No especificada'} readOnly />
+      </div>
+      <div className="mb-3">
+        <label className="form-label fw-bold">Correo electrónico</label>
+        <input className="form-control text-center" value={usuario?.email || ''} readOnly />
+      </div>
+    </div>
+  );
 
   const renderModificarDatos = () => (
     <div className="w-100" style={{ maxWidth: '500px' }}>
       <div className="mb-3">
         <label className="form-label fw-bold">Foto de perfil</label>
-        <input
-          type="file"
-          className="form-control"
-          accept="image/*"
-          onChange={handleImagenChange}
-        />
+        <input type="file" className="form-control" accept="image/*" onChange={handleImagenChange} />
       </div>
       <div className="mb-3">
         <label className="form-label fw-bold">Nombre</label>
-        <input
-          className="form-control text-center"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-        />
+        <input className="form-control text-center" name="name" value={formData.name} onChange={handleChange} />
       </div>
       <div className="mb-3">
         <label className="form-label fw-bold">Apellidos</label>
-        <input
-          className="form-control text-center"
-          name="last_name"
-          value={formData.last_name}
-          onChange={handleChange}
-        />
+        <input className="form-control text-center" name="last_name" value={formData.last_name} onChange={handleChange} />
       </div>
       <div className="mb-3">
         <label className="form-label fw-bold">Dirección</label>
-        <input
-          className="form-control text-center"
-          name="address"
-          value={formData.address}
-          onChange={handleChange}
-        />
+        <input className="form-control text-center" name="address" value={formData.address} onChange={handleChange} />
       </div>
       <button className="btn btn-primary w-100" onClick={handleActualizar}>
         Guardar cambios
       </button>
     </div>
   );
-  
 
   const renderContenido = () => {
     switch (seleccion) {
       case 'Perfil': return renderPerfil();
       case 'Modificar Datos': return renderModificarDatos();
-      case 'Pedidos': return <p className="fs-4">Aquí puedes ver tus pedidos y su estado.</p>;
-      case 'Contraseña': return <p className="fs-4">Aquí puedes cambiar tu contraseña de acceso.</p>;
-      default: return <p className="fs-4">Selecciona una opción del menú.</p>;
+      case 'Pedidos': return <p>Aquí puedes ver tus pedidos.</p>;
+      case 'Contraseña': return <p>Aquí puedes cambiar tu contraseña.</p>;
+      default: return <p>Selecciona una opción del menú.</p>;
     }
   };
 
@@ -156,11 +172,7 @@ const PanelUsuario = () => {
         <h4>Opciones del Menú</h4>
         <div className="d-flex flex-column gap-3">
           {opciones.map((item) => (
-            <button
-              key={item}
-              className={`btn ${seleccion === item ? 'btn-active' : 'btn-outline-light'} text-start`}
-              onClick={() => handleClick(item)}
-            >
+            <button key={item} className={`btn ${seleccion === item ? 'btn-active' : 'btn-outline-light'} text-start`} onClick={() => handleClick(item)}>
               {item}
             </button>
           ))}

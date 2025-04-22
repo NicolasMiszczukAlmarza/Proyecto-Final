@@ -58,7 +58,17 @@ return [
     |
     */
 
-    'allowed_headers' => ['Content-Type', 'X-Auth-Token', 'Authorization', 'Origin', 'X-Requested-With', 'Accept', 'Access-Control-Allow-Credentials'],
+'allowed_headers' => [
+    'Content-Type',
+    'X-Auth-Token',
+    'Authorization',
+    'Origin',
+    'X-Requested-With',
+    'Accept',
+    'Access-Control-Allow-Credentials',
+    'X-XSRF-TOKEN', // 👈 Agrega este
+],
+
 
     /*
     |--------------------------------------------------------------------------
