@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -8,26 +8,45 @@ import './Pago.css';
 const Pago = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { totalFinal, carrito, descuentoAplicado } = location.state;
+  const { totalFinal, carrito, descuentoAplicado } = location.state || {};
+
+  // Leer usuario autenticado de localStorage
+  let correo = null;
+  try {
+    const usuario = JSON.parse(localStorage.getItem('usuario'));
+    correo = usuario?.email || null;
+  } catch {
+    correo = null;
+  }
 
   const [titular, setTitular] = useState('');
   const [numeroTarjeta, setNumeroTarjeta] = useState('');
   const [fechaCaducidad, setFechaCaducidad] = useState('');
   const [cvv, setCvv] = useState('');
 
-  // Obtener el correo del almacenamiento local
-  const correo = localStorage.getItem('userEmail');
+  // Redirección y protección de ruta
+  useEffect(() => {
+    if (!correo) {
+      toast.error('No se encontró el correo del usuario. Inicie sesión nuevamente.', {
+        position: 'top-center',
+        autoClose: 2000,
+        theme: 'colored',
+      });
+      setTimeout(() => navigate('/login'), 2000);
+      return;
+    }
+    if (!carrito || !totalFinal) {
+      toast.error('No tienes datos de pedido. Redirigiendo al carrito...', {
+        position: 'top-center',
+        autoClose: 2000,
+        theme: 'colored',
+      });
+      setTimeout(() => navigate('/carrito-invitado'), 2000);
+    }
+  }, [correo, carrito, totalFinal, navigate]);
 
-  // Validación del correo
-  if (!correo) {
-    toast.error('No se encontró el correo del usuario. Inicie sesión nuevamente.', {
-      position: 'top-center',
-      autoClose: 3000,
-      theme: 'colored',
-    });
-    navigate('/login');
-    return null;
-  }
+  // No renderiza el formulario si falta info
+  if (!correo || !carrito || !totalFinal) return <ToastContainer />;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,15 +65,13 @@ const Pago = () => {
         method: 'GET',
         credentials: 'include',
       });
-      if (!csrfResponse.ok) {
-        throw new Error('No se pudo obtener el token CSRF');
-      }
+      if (!csrfResponse.ok) throw new Error('No se pudo obtener el token CSRF');
 
       const pedidoData = {
         correo,
         carrito,
-        total: totalFinal,  // Usamos el total con descuento directamente
-        descuento: descuentoAplicado  // Añadimos el descuento al objeto
+        total: totalFinal,
+        descuento: descuentoAplicado,
       };
 
       const response = await fetch('http://localhost:8000/pedidos', {
@@ -106,7 +123,7 @@ const Pago = () => {
       <form className="pago-form" onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="monto">Cantidad a pagar:</label>
-          <input type="text" id="monto" value={`${totalFinal.toFixed(2)}€`} readOnly />
+          <input type="text" id="monto" value={`${totalFinal?.toFixed(2) || ''}€`} readOnly />
         </div>
         <div className="form-group">
           <label htmlFor="titular">Titular de la tarjeta:</label>
