@@ -12,10 +12,10 @@ class PedidoController extends Controller
     {
         // Validar datos recibidos
         $data = $request->validate([
-            'correo'  => 'required|email',
-            'carrito' => 'required|array',
-            'total'   => 'required|numeric',
-            'descuento' => 'nullable|numeric'  // Acepta el descuento como numérico
+            'correo'     => 'required|email',
+            'carrito'    => 'required|array',
+            'total'      => 'required|numeric',
+            'descuento'  => 'nullable|numeric'  // Acepta el descuento como numérico
         ]);
 
         // Generar un identificador único para el pedido
@@ -24,7 +24,11 @@ class PedidoController extends Controller
         try {
             // Insertar cada producto del carrito
             foreach ($data['carrito'] as $producto) {
-                if (!isset($producto['id']) || !isset($producto['cantidad']) || !isset($producto['precio'])) {
+                if (
+                    !isset($producto['id']) ||
+                    !isset($producto['cantidad']) ||
+                    !isset($producto['precio'])
+                ) {
                     return response()->json(['message' => 'Datos del producto incompletos.'], 422);
                 }
 
@@ -32,14 +36,15 @@ class PedidoController extends Controller
                 $precioProducto = $producto['cantidad'] * $producto['precio'];
 
                 DB::table('pedidos')->insert([
-                    'order_id'       => $orderId,
-                    'id_producto'    => $producto['id'],
-                    'correo'         => $data['correo'],
-                    'cantidad'       => $producto['cantidad'],
-                    'precioProducto' => $precioProducto,
-                    'descuento'      => $data['descuento'] ?? 0,   // Guarda el descuento o 0 si no existe
-                    'precioTotal'    => $data['total'],
-                    'fecha'          => now(),
+                    'order_id'        => $orderId,
+                    'id_producto'     => $producto['id'],
+                    'correo'          => $data['correo'],
+                    'cantidad'        => $producto['cantidad'],
+                    'precio'          => $producto['precio'],      // 👈 ESTO ES CLAVE
+                    'precioProducto'  => $precioProducto,
+                    'descuento'       => $data['descuento'] ?? 0,
+                    'precioTotal'     => $data['total'],
+                    'fecha'           => now(),
                 ]);
             }
         } catch (Exception $e) {
