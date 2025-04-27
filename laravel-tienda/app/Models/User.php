@@ -15,6 +15,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @property string $password
  * @property string $address
  * @property string $roles
+ * @property string $profile_image    // <-- Agregado aquí
  * @property string $remember_token
  * @property Carbon $created_at
  * @property Carbon $updated_at
@@ -37,6 +38,7 @@ class User extends Authenticatable
         'password',
         'address',
         'roles',
+        'profile_image',      // <-- AÑADE ESTE CAMPO
         'remember_token'
     ];
 

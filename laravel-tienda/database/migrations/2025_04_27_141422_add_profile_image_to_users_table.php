@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             // Agregar el campo profile_image con valor por defecto
-            $table->string('profile_image')->nullable()->default('public/img/usuario/principal.png');
+            $table->string('profile_image')->nullable()->default('img/usuario/principal.png');
         });
     }
 

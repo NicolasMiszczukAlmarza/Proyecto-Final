@@ -69,38 +69,45 @@ Route::middleware(['web'])->group(function () {
 
     // 📌 Actualizar datos del usuario autenticado
     Route::post('/actualizar-usuario', function (Request $request) {
-        dd(Auth::user()); // 👈 esto para debug temporal
         $user = Auth::user();
     
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'address' => 'nullable|string|max:255',
-            'img' => 'nullable|image|max:2048',
+            'profile_image' => 'nullable|image|max:2048',
         ]);
     
-        if ($request->hasFile('img')) {
-            $image = $request->file('img');
+        if ($request->hasFile('profile_image')) {
+            // Elimina la imagen anterior solo si no es la default y existe
+            if (
+                $user->profile_image &&
+                $user->profile_image !== 'img/usuario/principal.png' &&
+                file_exists(public_path($user->profile_image))
+            ) {
+                @unlink(public_path($user->profile_image));
+            }
+    
+            $image = $request->file('profile_image');
             $imageName = time() . '_' . $image->getClientOriginalName();
             $image->move(public_path('uploads'), $imageName);
     
-            $user->img = 'uploads/' . $imageName;
+            // Guarda el path relativo
+            $user->profile_image = 'uploads/' . $imageName;
         }
     
-        $user->update([
-            'name' => $validated['name'],
-            'last_name' => $validated['last_name'],
-            'address' => $validated['address'],
-        ]);
-    
+        $user->name = $validated['name'];
+        $user->last_name = $validated['last_name'];
+        $user->address = $validated['address'];
         $user->save();
     
         return response()->json([
             'message' => 'Usuario actualizado correctamente',
-            'img' => $user->img ?? null, // aseguramos que siempre devuelve la clave
+            'profile_image' => $user->profile_image ?? 'img/usuario/principal.png',
         ]);
-        
     })->middleware('auth:sanctum');
+    
+
     
 
     

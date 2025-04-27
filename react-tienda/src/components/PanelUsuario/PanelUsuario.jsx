@@ -60,7 +60,7 @@ const PanelUsuario = () => {
       formDataToSend.append('name', formData.name);
       formDataToSend.append('last_name', formData.last_name);
       formDataToSend.append('address', formData.address);
-      if (imagen) formDataToSend.append('img', imagen);
+      if (imagen) formDataToSend.append('profile_image', imagen); // <-- CAMBIO AQUÍ
 
       const response = await fetch('http://localhost:8000/actualizar-usuario', {
         method: 'POST',
@@ -89,7 +89,7 @@ const PanelUsuario = () => {
 
       const data = isJson ? await response.json() : {};
       const updatedUser = { ...usuario, ...formData };
-      if (data.img) updatedUser.img = data.img;
+      if (data.profile_image) updatedUser.profile_image = data.profile_image; // <-- CAMBIO AQUÍ
 
       localStorage.setItem('usuario', JSON.stringify(updatedUser));
       setUsuario(updatedUser);
@@ -103,13 +103,16 @@ const PanelUsuario = () => {
   const renderPerfil = () => (
     <div className="w-100" style={{ maxWidth: '500px' }}>
       <div className="mb-3 text-center">
-        {usuario?.img && (
-          <img
-            src={`http://localhost:8000/${usuario.img}`}
-            alt="Perfil"
-            style={{ width: '120px', borderRadius: '50%' }}
-          />
-        )}
+        <img
+          src={
+            usuario?.profile_image
+              ? `http://localhost:8000/${usuario.profile_image}`
+              : '/img/usuario/principal.png'
+          }
+          alt="Perfil"
+          style={{ width: '120px', borderRadius: '50%' }}
+          onError={e => { e.target.src = '/img/usuario/principal.png'; }}
+        />
       </div>
       <div className="mb-3">
         <label className="form-label fw-bold">Nombre</label>
@@ -178,7 +181,6 @@ const PanelUsuario = () => {
           ))}
         </div>
       </div>
-
       <div className="panel-content d-flex justify-content-center align-items-start pt-4">
         <div className="w-100">
           <h1 className="display-6 text-center mb-4">Panel del Usuario</h1>
