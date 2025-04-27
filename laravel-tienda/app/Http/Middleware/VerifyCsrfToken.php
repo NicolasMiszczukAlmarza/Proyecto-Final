@@ -18,6 +18,7 @@ class VerifyCsrfToken extends Middleware
         'sanctum/csrf-cookie',
         'pedidos',
         'actualizar-usuario',
+        'forgot-password',    // <-- Añadido
+        'reset-password',     // <-- Añadido
     ];
-    
 }

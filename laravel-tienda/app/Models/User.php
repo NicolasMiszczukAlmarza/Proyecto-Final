@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable; // <-- IMPORTANTE
 
 /**
  * Class User
@@ -15,7 +16,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @property string $password
  * @property string $address
  * @property string $roles
- * @property string $profile_image    // <-- Agregado aquí
+ * @property string $profile_image
  * @property string $remember_token
  * @property Carbon $created_at
  * @property Carbon $updated_at
@@ -24,6 +25,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  */
 class User extends Authenticatable
 {
+    use Notifiable; // <-- AGREGA ESTE TRAIT
+
     protected $table = 'users';
 
     protected $hidden = [
@@ -38,7 +41,7 @@ class User extends Authenticatable
         'password',
         'address',
         'roles',
-        'profile_image',      // <-- AÑADE ESTE CAMPO
+        'profile_image',
         'remember_token'
     ];
 

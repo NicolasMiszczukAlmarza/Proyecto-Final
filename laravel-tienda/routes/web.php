@@ -4,18 +4,19 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use App\Models\User;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\PedidoController;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
-// 📌 Middleware 'web' para sesiones y cookies
+// Middleware 'web' para sesiones y cookies
 Route::middleware(['web'])->group(function () {
 
-    // 📌 CSRF Token para uso con Sanctum
+    // CSRF Token para uso con Sanctum
     Route::get('sanctum/csrf-cookie', [CsrfCookieController::class, 'show'])->name('csrf-cookie');
 
-    // 📌 Login de usuario
+    // Login de usuario
     Route::post('/login', function (Request $request) {
         $credentials = $request->validate([
             'email' => 'required|email',
@@ -36,50 +37,47 @@ Route::middleware(['web'])->group(function () {
         ]);
     })->name('login');
 
-    // 📌 Cierre de sesión
+    // Cierre de sesión
     Route::post('/logout', function () {
         Auth::logout();
         return response()->json(['message' => 'Logout exitoso']);
     })->name('logout');
 
-    // 📌 Obtener datos del usuario autenticado (ruta '/user')
+    // Obtener datos del usuario autenticado
     Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
-        // Esta ruta usa el middleware 'auth:sanctum' para asegurar que el usuario esté autenticado
-        return response()->json($request->user()); // Devuelve los datos del usuario autenticado
+        return response()->json($request->user());
     })->name('user');
 
-    // 📌 Obtener datos del usuario autenticado (ruta '/users') - alternativa
+    // Alternativa para obtener datos del usuario autenticado
     Route::middleware(['auth:sanctum'])->get('/users', function (Request $request) {
-        // Ahora la ruta '/users' devuelve los datos del usuario autenticado
-        return response()->json($request->user()); // Devuelve los datos del usuario autenticado
+        return response()->json($request->user());
     })->name('users');
 
-    // 📌 Registro
+    // Registro
     Route::get('/register', fn () => view('auth.register'))->name('register');
     Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
 
-    // 📌 Página principal
+    // Página principal
     Route::get('/', fn () => view('welcome'));
 
-    // 📌 Proteger GET en /login
+    // Proteger GET en /login
     Route::get('/login', fn () => response()->json(['message' => 'Esta ruta solo acepta POST'], 405));
 
-    // 📌 Guardar pedido
+    // Guardar pedido
     Route::post('/pedidos', [PedidoController::class, 'store'])->middleware('auth:sanctum');
 
-    // 📌 Actualizar datos del usuario autenticado
+    // Actualizar datos del usuario autenticado
     Route::post('/actualizar-usuario', function (Request $request) {
         $user = Auth::user();
-    
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'address' => 'nullable|string|max:255',
             'profile_image' => 'nullable|image|max:2048',
         ]);
-    
+
         if ($request->hasFile('profile_image')) {
-            // Elimina la imagen anterior solo si no es la default y existe
             if (
                 $user->profile_image &&
                 $user->profile_image !== 'img/usuario/principal.png' &&
@@ -87,28 +85,72 @@ Route::middleware(['web'])->group(function () {
             ) {
                 @unlink(public_path($user->profile_image));
             }
-    
+
             $image = $request->file('profile_image');
             $imageName = time() . '_' . $image->getClientOriginalName();
             $image->move(public_path('uploads'), $imageName);
-    
-            // Guarda el path relativo
+
             $user->profile_image = 'uploads/' . $imageName;
         }
-    
+
         $user->name = $validated['name'];
         $user->last_name = $validated['last_name'];
         $user->address = $validated['address'];
         $user->save();
-    
+
         return response()->json([
             'message' => 'Usuario actualizado correctamente',
             'profile_image' => $user->profile_image ?? 'img/usuario/principal.png',
         ]);
     })->middleware('auth:sanctum');
-    
 
-    
+    // ===================================
+    //        RECUPERACIÓN DE CONTRASEÑA
+    // ===================================
 
-    
+    // 1. Solicitar envío de email para recuperar contraseña
+    Route::post('/forgot-password', function (Request $request) {
+        $request->validate(['email' => 'required|email']);
+
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
+
+        return response()->json([
+            'message' => $status === Password::RESET_LINK_SENT
+                ? 'Hemos enviado un correo de recuperación si el email está registrado.'
+                : 'No hemos podido enviar el correo de recuperación.'
+        ]);
+    });
+
+    // 2. Cambiar la contraseña desde el enlace del email
+    Route::post('/reset-password', function (Request $request) {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|confirmed|min:8',
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->password = bcrypt($password);
+                $user->save();
+            }
+        );
+
+        return response()->json([
+            'message' => $status === Password::PASSWORD_RESET
+                ? 'La contraseña ha sido cambiada correctamente.'
+                : __($status),
+        ]);
+    });
+
+    // 3. Ruta que Laravel necesita para poner el enlace en el correo (¡ES OBLIGATORIA!)
+    Route::get('/reset-password/{token}', function (Request $request, $token) {
+        // Redirige a tu frontend con token y email
+        return redirect("http://localhost:5173/reset-password?token=$token&email=" . $request->query('email'));
+        // Si tu React corre en otro puerto/carpeta, cambia la URL arriba
+    })->name('password.reset');
+
 });
