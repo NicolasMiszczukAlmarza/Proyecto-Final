@@ -102,6 +102,60 @@ const PanelUsuario = () => {
     }
   };
 
+  // --- NUEVO: formulario de recuperación de contraseña ---
+  const handleEnviarRecuperacion = async (e) => {
+    e.preventDefault();
+    setMensaje({ texto: '', tipo: '' });
+    try {
+      await fetch('http://localhost:8000/sanctum/csrf-cookie', {
+        credentials: 'include',
+      });
+
+      const xsrfToken = decodeURIComponent(
+        document.cookie
+          .split('; ')
+          .find(row => row.startsWith('XSRF-TOKEN='))
+          ?.split('=')[1] || ''
+      );
+
+      const response = await fetch('http://localhost:8000/forgot-password', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-XSRF-TOKEN': xsrfToken,
+        },
+        body: JSON.stringify({ email: usuario?.email }),
+      });
+
+      const data = await response.json();
+
+      setMensaje({
+        texto: data.message || 'Intenta nuevamente.',
+        tipo: response.ok ? 'success' : 'danger',
+      });
+
+      // LOGOUT automático solo si fue exitoso, después de 5 segundos
+      if (response.ok) {
+        setTimeout(async () => {
+          localStorage.removeItem('usuario');
+          try {
+            await fetch('http://localhost:8000/logout', {
+              method: 'POST',
+              credentials: 'include'
+            });
+          } catch (err) { /* Ignorar error de logout */ }
+          navigate('/login');
+        }, 5000); // <-- Espera 5 segundos antes del logout
+      } else {
+        setTimeout(() => setMensaje({ texto: '', tipo: '' }), 4000);
+      }
+    } catch (err) {
+      setMensaje({ texto: '❌ Error al conectar con el servidor.', tipo: 'danger' });
+      setTimeout(() => setMensaje({ texto: '', tipo: '' }), 4000);
+    }
+  };
+
   const renderPerfil = () => (
     <div className="w-100" style={{ maxWidth: '500px' }}>
       <div className="mb-3 text-center">
@@ -159,12 +213,34 @@ const PanelUsuario = () => {
     </div>
   );
 
+  // --- NUEVO: render para la pestaña Contraseña
+  const renderContraseña = () => (
+    <div className="w-100" style={{ maxWidth: '400px' }}>
+      <form onSubmit={handleEnviarRecuperacion}>
+        <div className="mb-3">
+          <label className="form-label fw-bold">Correo electrónico</label>
+          <input
+            className="form-control text-center"
+            value={usuario?.email || ''}
+            readOnly
+          />
+        </div>
+        <button type="submit" className="btn btn-warning w-100">
+          Enviar correo de recuperación
+        </button>
+        <div className="mt-3 small text-muted text-center">
+          Te enviaremos un enlace a tu correo para cambiar la contraseña.
+        </div>
+      </form>
+    </div>
+  );
+
   const renderContenido = () => {
     switch (seleccion) {
       case 'Perfil': return renderPerfil();
       case 'Modificar Datos': return renderModificarDatos();
       case 'Pedidos': return <p>Aquí puedes ver tus pedidos.</p>;
-      case 'Contraseña': return <p>Aquí puedes cambiar tu contraseña.</p>;
+      case 'Contraseña': return renderContraseña();
       default: return <p>Selecciona una opción del menú.</p>;
     }
   };

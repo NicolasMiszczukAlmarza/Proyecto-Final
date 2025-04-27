@@ -31,10 +31,7 @@ const Login = () => {
 
       if (response.ok) {
         const data = await response.json();
-
-        // ✅ Guardar datos del usuario (no solo el correo)
         localStorage.setItem('usuario', JSON.stringify(data.user));
-
         navigate('/carrito');
       } else {
         setErrorMessage('Usuario no registrado y/o contraseña incorrecta');
@@ -87,8 +84,14 @@ const Login = () => {
             </div>
             <button type="submit" className="btn btn-primary w-100">Iniciar Sesión</button>
           </form>
+
           <div className="text-center mt-3">
             <p>¿No tienes cuenta? <Link to="/registro">¡Créala aquí!</Link></p>
+            <p>
+              <Link to="/forgot-password" className="text-decoration-underline" style={{ color: '#007bff' }}>
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </p>
           </div>
         </div>
       </div>
