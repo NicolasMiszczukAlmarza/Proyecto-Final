@@ -8,9 +8,11 @@ const PanelUsuario = () => {
   const [formData, setFormData] = useState({ name: '', last_name: '', address: '' });
   const [imagen, setImagen] = useState(null);
   const [mensaje, setMensaje] = useState({ texto: '', tipo: '' });
+  const [pedidos, setPedidos] = useState([]);
+  const [cargandoPedidos, setCargandoPedidos] = useState(false);
+
   const navigate = useNavigate();
 
-  // Carga el usuario al montar el componente
   useEffect(() => {
     const storedUser = localStorage.getItem('usuario');
     if (storedUser) {
@@ -25,6 +27,19 @@ const PanelUsuario = () => {
       navigate('/login');
     }
   }, [navigate]);
+
+  useEffect(() => {
+    if (seleccion !== "Pedidos" || !usuario?.email) return;
+    setCargandoPedidos(true);
+    setPedidos([]);
+    fetch(`http://localhost:8000/pedidos-usuario/${usuario.email}`, {
+      credentials: "include"
+    })
+      .then(res => res.json())
+      .then(data => setPedidos(Array.isArray(data) ? data : []))
+      .catch(() => setPedidos([]))
+      .finally(() => setCargandoPedidos(false));
+  }, [seleccion, usuario]);
 
   const handleClick = (opcion) => {
     if (opcion === 'Ir al carrito') return navigate('/carrito');
@@ -102,7 +117,6 @@ const PanelUsuario = () => {
     }
   };
 
-  // --- NUEVO: formulario de recuperación de contraseña ---
   const handleEnviarRecuperacion = async (e) => {
     e.preventDefault();
     setMensaje({ texto: '', tipo: '' });
@@ -135,7 +149,6 @@ const PanelUsuario = () => {
         tipo: response.ok ? 'success' : 'danger',
       });
 
-      // LOGOUT automático solo si fue exitoso, después de 5 segundos
       if (response.ok) {
         setTimeout(async () => {
           localStorage.removeItem('usuario');
@@ -144,9 +157,9 @@ const PanelUsuario = () => {
               method: 'POST',
               credentials: 'include'
             });
-          } catch (err) { /* Ignorar error de logout */ }
+          } catch (err) { }
           navigate('/login');
-        }, 5000); // <-- Espera 5 segundos antes del logout
+        }, 5000);
       } else {
         setTimeout(() => setMensaje({ texto: '', tipo: '' }), 4000);
       }
@@ -154,6 +167,62 @@ const PanelUsuario = () => {
       setMensaje({ texto: '❌ Error al conectar con el servidor.', tipo: 'danger' });
       setTimeout(() => setMensaje({ texto: '', tipo: '' }), 4000);
     }
+  };
+
+  // --- AGRUPAR pedidos por order_id y mostrar por pedido (agrupado) ---
+  const renderPedidos = () => {
+    const pedidosPorOrden = pedidos.reduce((acc, ped) => {
+      acc[ped.order_id] = acc[ped.order_id] || [];
+      acc[ped.order_id].push(ped);
+      return acc;
+    }, {});
+
+    return (
+      <div className="w-100" style={{ maxWidth: 600 }}>
+        <h5 className="mb-3 text-center">Tus pedidos</h5>
+        {cargandoPedidos ? (
+          <div className="text-center">Cargando...</div>
+        ) : Object.keys(pedidosPorOrden).length === 0 ? (
+          <div className="alert alert-info text-center">No has realizado pedidos aún.</div>
+        ) : (
+          Object.entries(pedidosPorOrden).map(([orderId, productos]) => (
+            <div key={orderId} className="mb-4 p-3" style={{ background: "#f6f7f9", borderRadius: 15, boxShadow: "0 1px 8px #eee" }}>
+              <div className="mb-2"><b>Identificador:</b> <span style={{ color: "#3296fe" }}>{orderId}</span></div>
+              <div style={{ fontSize: 14, color: "#666" }}>
+                <b>Fecha:</b> {productos[0].fecha?.slice(0, 19).replace('T', ' ')}
+                {productos[0].precioTotal && (
+                  <span className="ms-3">
+                    <b>Total:</b> {productos[0].precioTotal} €
+                    {productos[0].descuento > 0 && (
+                      <span> (Descuento: {productos[0].descuento} €)</span>
+                    )}
+                  </span>
+                )}
+              </div>
+              <hr />
+              {productos.map((pedido, idx) => (
+                <div key={pedido.id || idx} className="d-flex align-items-center gap-3 mb-2">
+                  {pedido.producto_img && (
+                    <img
+                      src={`http://localhost:8000/${pedido.producto_img}`}
+                      alt={pedido.producto_nombre || 'Producto'}
+                      style={{ width: 50, borderRadius: 10, objectFit: 'cover', border: '1px solid #ccc' }}
+                      onError={e => { e.target.src = '/img/usuario/principal.png'; }}
+                    />
+                  )}
+                  <div>
+                    <div><b>{pedido.producto_nombre || pedido.nombre || 'Producto'}</b></div>
+                    <div style={{ fontSize: 14 }}>
+                      <b>Cantidad:</b> {pedido.cantidad} | <b>Precio:</b> {pedido.precioProducto} €
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))
+        )}
+      </div>
+    );
   };
 
   const renderPerfil = () => (
@@ -213,7 +282,6 @@ const PanelUsuario = () => {
     </div>
   );
 
-  // --- NUEVO: render para la pestaña Contraseña
   const renderContraseña = () => (
     <div className="w-100" style={{ maxWidth: '400px' }}>
       <form onSubmit={handleEnviarRecuperacion}>
@@ -239,7 +307,7 @@ const PanelUsuario = () => {
     switch (seleccion) {
       case 'Perfil': return renderPerfil();
       case 'Modificar Datos': return renderModificarDatos();
-      case 'Pedidos': return <p>Aquí puedes ver tus pedidos.</p>;
+      case 'Pedidos': return renderPedidos();
       case 'Contraseña': return renderContraseña();
       default: return <p>Selecciona una opción del menú.</p>;
     }
@@ -266,7 +334,6 @@ const PanelUsuario = () => {
       <div className="panel-content d-flex justify-content-center align-items-start pt-4">
         <div className="w-100">
           <h1 className="display-6 text-center mb-4">Panel del Usuario</h1>
-          {/* ALERT BONITO */}
           {mensaje.texto && (
             <div
               className={`alert alert-${mensaje.tipo} text-center`}

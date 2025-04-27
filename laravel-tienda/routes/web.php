@@ -10,13 +10,13 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\PedidoController;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
-// Middleware 'web' para sesiones y cookies
+// ----- Grupo para rutas que usan sesión, cookies y Sanctum -----
 Route::middleware(['web'])->group(function () {
 
-    // CSRF Token para uso con Sanctum
+    // --------- CSRF para Sanctum (obligatorio en SPA) ---------
     Route::get('sanctum/csrf-cookie', [CsrfCookieController::class, 'show'])->name('csrf-cookie');
 
-    // Login de usuario
+    // --------- LOGIN ---------
     Route::post('/login', function (Request $request) {
         $credentials = $request->validate([
             'email' => 'required|email',
@@ -35,38 +35,23 @@ Route::middleware(['web'])->group(function () {
             'message' => 'Login exitoso',
             'user' => Auth::user(),
         ]);
-    })->name('login');
+    });
 
-    // Cierre de sesión
+    // --------- LOGOUT ---------
     Route::post('/logout', function () {
         Auth::logout();
         return response()->json(['message' => 'Logout exitoso']);
-    })->name('logout');
+    });
 
-    // Obtener datos del usuario autenticado
+    // --------- REGISTRO ---------
+    Route::post('/register', [RegisterController::class, 'store']);
+
+    // --------- OBTENER USUARIO AUTENTICADO ---------
     Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
         return response()->json($request->user());
-    })->name('user');
+    });
 
-    // Alternativa para obtener datos del usuario autenticado
-    Route::middleware(['auth:sanctum'])->get('/users', function (Request $request) {
-        return response()->json($request->user());
-    })->name('users');
-
-    // Registro
-    Route::get('/register', fn () => view('auth.register'))->name('register');
-    Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
-
-    // Página principal
-    Route::get('/', fn () => view('welcome'));
-
-    // Proteger GET en /login
-    Route::get('/login', fn () => response()->json(['message' => 'Esta ruta solo acepta POST'], 405));
-
-    // Guardar pedido
-    Route::post('/pedidos', [PedidoController::class, 'store'])->middleware('auth:sanctum');
-
-    // Actualizar datos del usuario autenticado
+    // --------- ACTUALIZAR DATOS DEL USUARIO AUTENTICADO ---------
     Route::post('/actualizar-usuario', function (Request $request) {
         $user = Auth::user();
 
@@ -104,9 +89,15 @@ Route::middleware(['web'])->group(function () {
         ]);
     })->middleware('auth:sanctum');
 
-    // ===================================
-    //        RECUPERACIÓN DE CONTRASEÑA
-    // ===================================
+    // --------- GUARDAR UN NUEVO PEDIDO ---------
+    Route::post('/pedidos', [PedidoController::class, 'store'])->middleware('auth:sanctum');
+
+    // --------- OBTENER TODOS LOS PEDIDOS DE UN USUARIO POR SU CORREO (CON JOIN PRODUCTO) ---------
+    Route::get('/pedidos-usuario/{correo}', [PedidoController::class, 'pedidosUsuario'])->middleware('auth:sanctum');
+
+    // ===========================
+    //   RECUPERACIÓN DE CONTRASEÑA
+    // ===========================
 
     // 1. Solicitar envío de email para recuperar contraseña
     Route::post('/forgot-password', function (Request $request) {
@@ -150,7 +141,8 @@ Route::middleware(['web'])->group(function () {
     Route::get('/reset-password/{token}', function (Request $request, $token) {
         // Redirige a tu frontend con token y email
         return redirect("http://localhost:5173/reset-password?token=$token&email=" . $request->query('email'));
-        // Si tu React corre en otro puerto/carpeta, cambia la URL arriba
-    })->name('password.reset');
+    });
 
+    // --------- (Opcional) Ruta principal de bienvenida ----------
+    Route::get('/', fn () => view('welcome'));
 });

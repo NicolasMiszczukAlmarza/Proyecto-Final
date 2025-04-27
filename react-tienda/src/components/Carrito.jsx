@@ -126,7 +126,7 @@ const Carrito = () => {
       <header className="header fixed-top">
         <div className="container-fluid d-flex flex-column align-items-center p-3">
           <div className="d-flex justify-content-between w-100 align-items-center">
-            <img src="/img/logo/logo.jpg" alt="Logo" className="logo" />
+            <img src="public/img/logo/logo.jpg" alt="Logo" className="logo" />
 
             <input
               type="text"
