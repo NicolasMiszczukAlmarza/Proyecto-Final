@@ -7,8 +7,10 @@ const PanelUsuario = () => {
   const [usuario, setUsuario] = useState(null);
   const [formData, setFormData] = useState({ name: '', last_name: '', address: '' });
   const [imagen, setImagen] = useState(null);
+  const [mensaje, setMensaje] = useState({ texto: '', tipo: '' });
   const navigate = useNavigate();
 
+  // Carga el usuario al montar el componente
   useEffect(() => {
     const storedUser = localStorage.getItem('usuario');
     if (storedUser) {
@@ -60,7 +62,7 @@ const PanelUsuario = () => {
       formDataToSend.append('name', formData.name);
       formDataToSend.append('last_name', formData.last_name);
       formDataToSend.append('address', formData.address);
-      if (imagen) formDataToSend.append('profile_image', imagen); // <-- CAMBIO AQUÍ
+      if (imagen) formDataToSend.append('profile_image', imagen);
 
       const response = await fetch('http://localhost:8000/actualizar-usuario', {
         method: 'POST',
@@ -75,7 +77,7 @@ const PanelUsuario = () => {
       const isJson = contentType && contentType.includes('application/json');
 
       if (response.status === 401) {
-        alert('⚠️ Tu sesión ha expirado. Por favor inicia sesión nuevamente.');
+        setMensaje({ texto: '⚠️ Tu sesión ha expirado. Por favor inicia sesión nuevamente.', tipo: 'danger' });
         localStorage.removeItem('usuario');
         navigate('/login');
         return;
@@ -83,20 +85,20 @@ const PanelUsuario = () => {
 
       if (!response.ok) {
         const errorMsg = isJson ? (await response.json()).message : 'Error desconocido';
-        alert(`❌ Error al actualizar: ${errorMsg}`);
+        setMensaje({ texto: `❌ Error al actualizar: ${errorMsg}`, tipo: 'danger' });
         return;
       }
 
       const data = isJson ? await response.json() : {};
       const updatedUser = { ...usuario, ...formData };
-      if (data.profile_image) updatedUser.profile_image = data.profile_image; // <-- CAMBIO AQUÍ
+      if (data.profile_image) updatedUser.profile_image = data.profile_image;
 
       localStorage.setItem('usuario', JSON.stringify(updatedUser));
       setUsuario(updatedUser);
-      alert('✅ Datos actualizados correctamente.');
+      setMensaje({ texto: '✅ Datos actualizados correctamente.', tipo: 'success' });
+      setTimeout(() => setMensaje({ texto: '', tipo: '' }), 3000);
     } catch (err) {
-      console.error('Error actualizando:', err);
-      alert('❌ Error al conectar con el servidor.');
+      setMensaje({ texto: '❌ Error al conectar con el servidor.', tipo: 'danger' });
     }
   };
 
@@ -175,7 +177,11 @@ const PanelUsuario = () => {
         <h4>Opciones del Menú</h4>
         <div className="d-flex flex-column gap-3">
           {opciones.map((item) => (
-            <button key={item} className={`btn ${seleccion === item ? 'btn-active' : 'btn-outline-light'} text-start`} onClick={() => handleClick(item)}>
+            <button
+              key={item}
+              className={`btn ${seleccion === item ? 'btn-active' : 'btn-outline-light'} text-start`}
+              onClick={() => handleClick(item)}
+            >
               {item}
             </button>
           ))}
@@ -184,6 +190,23 @@ const PanelUsuario = () => {
       <div className="panel-content d-flex justify-content-center align-items-start pt-4">
         <div className="w-100">
           <h1 className="display-6 text-center mb-4">Panel del Usuario</h1>
+          {/* ALERT BONITO */}
+          {mensaje.texto && (
+            <div
+              className={`alert alert-${mensaje.tipo} text-center`}
+              style={{
+                maxWidth: 500,
+                margin: '0 auto 1.5rem auto',
+                fontSize: '1.1rem',
+                fontWeight: 500,
+                borderRadius: '1rem',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.10)',
+                letterSpacing: '0.5px'
+              }}
+            >
+              {mensaje.texto}
+            </div>
+          )}
           <div className="contenido-box d-flex justify-content-center">
             {renderContenido()}
           </div>

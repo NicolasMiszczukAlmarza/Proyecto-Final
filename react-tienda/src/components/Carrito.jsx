@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faShoppingCart, faUser } from "@fortawesome/free-solid-svg-icons";
+import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 import "./Carrito.css";
 import { categorias } from "../data/categorias";
 import { productos } from "../data/productos";
@@ -17,32 +17,28 @@ const Carrito = () => {
   const [cantidad, setCantidad] = useState(1);
   const [showCarritoModal, setShowCarritoModal] = useState(false);
 
-  // 🔐 Verificar usuario logueado y mostrar mensaje
+  // Obtener usuario actual
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
+
   useEffect(() => {
-    const data = localStorage.getItem("usuario");
-    if (data) {
-      console.log("✅ Login exitoso");
-    }
-  }, []);
+    if (!usuario) navigate("/login");
+  }, [usuario, navigate]);
 
   const handleCerrarSesion = async () => {
     try {
       const response = await fetch("http://localhost:8000/logout", {
         method: "POST",
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       });
-
       if (response.ok) {
         localStorage.removeItem("usuario");
         navigate("/login");
       } else {
-        console.error("Error al cerrar sesión en el servidor.");
+        alert("Error al cerrar sesión en el servidor.");
       }
     } catch (error) {
-      console.error("Error al cerrar sesión:", error);
+      alert("Error al cerrar sesión.");
     }
   };
 
@@ -52,9 +48,7 @@ const Carrito = () => {
     );
   };
 
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
-  };
+  const handleSearchChange = (event) => setSearchTerm(event.target.value);
 
   const productosFiltrados = productos.filter((producto) => {
     const categoria = categorias.find((cat) => cat.id === producto.id_categoria);
@@ -95,21 +89,21 @@ const Carrito = () => {
   };
 
   const handleCantidadChange = (e) => {
-    const nueva = Math.min(Math.max(1, parseInt(e.target.value, 10)), 5);
+    let nueva = Math.min(Math.max(1, parseInt(e.target.value, 10)), 5);
+    if (isNaN(nueva)) nueva = 1;
     setCantidad(nueva);
   };
 
   const aumentarCantidad = () => {
-    if (cantidad < 5) setCantidad(cantidad + 1);
+    setCantidad((prev) => (prev < 5 ? prev + 1 : prev));
   };
 
   const disminuirCantidad = () => {
-    if (cantidad > 1) setCantidad(cantidad - 1);
+    setCantidad((prev) => (prev > 1 ? prev - 1 : prev));
   };
 
-  const contarProductosCarrito = () => {
-    return carrito.length;
-  };
+  const contarProductosCarrito = () =>
+    carrito.reduce((acc, item) => acc + item.cantidad, 0);
 
   const eliminarProductoCarrito = (id) => {
     setCarrito((prev) => prev.filter((item) => item.id !== id));
@@ -133,6 +127,7 @@ const Carrito = () => {
         <div className="container-fluid d-flex flex-column align-items-center p-3">
           <div className="d-flex justify-content-between w-100 align-items-center">
             <img src="/img/logo/logo.jpg" alt="Logo" className="logo" />
+
             <input
               type="text"
               className="form-control search-bar mx-3"
@@ -140,6 +135,7 @@ const Carrito = () => {
               value={searchTerm}
               onChange={handleSearchChange}
             />
+
             <div className="d-flex align-items-center">
               <FontAwesomeIcon
                 icon={faShoppingCart}
@@ -147,11 +143,29 @@ const Carrito = () => {
                 onClick={() => setShowCarritoModal(true)}
               />
               <span className="carrito-counter">{contarProductosCarrito()}</span>
-              <FontAwesomeIcon
-                icon={faUser}
+
+              {/* FOTO DE USUARIO */}
+              <img
+                src={
+                  usuario?.profile_image
+                    ? `http://localhost:8000/${usuario.profile_image}`
+                    : "/img/usuario/principal.png"
+                }
+                alt="Perfil"
                 className="icono-usuario mx-2"
+                style={{
+                  width: "35px",
+                  height: "35px",
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  cursor: "pointer",
+                  border: "2px solid #ddd",
+                }}
                 onClick={handleIrAlPanelUsuario}
+                onError={e => { e.target.src = "/img/usuario/principal.png"; }}
+                title="Ir a tu panel"
               />
+
               <button
                 className="btn btn-danger btn-sm ms-3"
                 onClick={handleCerrarSesion}
@@ -165,9 +179,7 @@ const Carrito = () => {
               {categorias.map((cat) => (
                 <span
                   key={cat.id}
-                  className={`categoria ${
-                    categoriaSeleccionada === cat.nombre ? "selected" : ""
-                  }`}
+                  className={`categoria ${categoriaSeleccionada === cat.nombre ? "selected" : ""}`}
                   onClick={() => handleCategoriaClick(cat.nombre)}
                 >
                   {cat.nombre}
