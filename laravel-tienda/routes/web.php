@@ -10,13 +10,12 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\PedidoController;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
-// ----- Grupo para rutas que usan sesión, cookies y Sanctum -----
 Route::middleware(['web'])->group(function () {
 
-    // --------- CSRF para Sanctum (obligatorio en SPA) ---------
-    Route::get('sanctum/csrf-cookie', [CsrfCookieController::class, 'show'])->name('csrf-cookie');
+    // ---------- CSRF para Sanctum ----------
+    Route::get('/sanctum/csrf-cookie', [CsrfCookieController::class, 'show'])->name('csrf-cookie');
 
-    // --------- LOGIN ---------
+    // ---------- LOGIN ----------
     Route::post('/login', function (Request $request) {
         $credentials = $request->validate([
             'email' => 'required|email',
@@ -37,22 +36,56 @@ Route::middleware(['web'])->group(function () {
         ]);
     });
 
-    // --------- LOGOUT ---------
+    // ---------- LOGOUT ----------
     Route::post('/logout', function () {
         Auth::logout();
         return response()->json(['message' => 'Logout exitoso']);
     });
 
-    // --------- REGISTRO ---------
+    // ---------- REGISTRO ----------
     Route::post('/register', [RegisterController::class, 'store']);
 
-    // --------- OBTENER USUARIO AUTENTICADO ---------
-    Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
+    // ---------- USUARIO ACTUAL ----------
+    Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
         return response()->json($request->user());
     });
 
-    // --------- ACTUALIZAR DATOS DEL USUARIO AUTENTICADO ---------
-    Route::post('/actualizar-usuario', function (Request $request) {
+    // ---------- OBTENER USUARIOS CON ROL NORMAL ----------
+    // ✅ Devuelve todos los usuarios excepto el admin principal
+Route::middleware('auth:sanctum')->get('/usuarios', function () {
+    return User::where('email', '!=', 'nicoadmin@admin.com')
+        ->get(['id', 'name', 'last_name', 'email', 'roles']);
+});
+
+
+    // ---------- CONVERTIR EN ADMIN ----------
+    Route::middleware('auth:sanctum')->post('/convertir-admin', function (Request $request) {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+        $user->roles = 'admin';
+        $user->save();
+
+        return response()->json(['message' => 'Usuario promovido a administrador']);
+    });
+
+    // ---------- QUITAR ADMIN Y CONVERTIR EN NORMAL ----------
+    Route::middleware('auth:sanctum')->post('/quitar-admin', function (Request $request) {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+        $user->roles = 'normal';
+        $user->save();
+
+        return response()->json(['message' => 'Usuario convertido a rol normal']);
+    });
+
+    // ---------- ACTUALIZAR USUARIO ----------
+    Route::middleware('auth:sanctum')->post('/actualizar-usuario', function (Request $request) {
         $user = Auth::user();
 
         $validated = $request->validate([
@@ -74,7 +107,6 @@ Route::middleware(['web'])->group(function () {
             $image = $request->file('profile_image');
             $imageName = time() . '_' . $image->getClientOriginalName();
             $image->move(public_path('uploads'), $imageName);
-
             $user->profile_image = 'uploads/' . $imageName;
         }
 
@@ -87,34 +119,27 @@ Route::middleware(['web'])->group(function () {
             'message' => 'Usuario actualizado correctamente',
             'profile_image' => $user->profile_image ?? 'img/usuario/principal.png',
         ]);
-    })->middleware('auth:sanctum');
+    });
 
-    // --------- GUARDAR UN NUEVO PEDIDO ---------
-    Route::post('/pedidos', [PedidoController::class, 'store'])->middleware('auth:sanctum');
+    // ---------- GUARDAR PEDIDO ----------
+    Route::middleware('auth:sanctum')->post('/pedidos', [PedidoController::class, 'store']);
 
-    // --------- OBTENER TODOS LOS PEDIDOS DE UN USUARIO POR SU CORREO (CON JOIN PRODUCTO) ---------
-    Route::get('/pedidos-usuario/{correo}', [PedidoController::class, 'pedidosUsuario'])->middleware('auth:sanctum');
+    // ---------- PEDIDOS POR USUARIO ----------
+    Route::middleware('auth:sanctum')->get('/pedidos-usuario/{correo}', [PedidoController::class, 'pedidosUsuario']);
 
-    // ===========================
-    //   RECUPERACIÓN DE CONTRASEÑA
-    // ===========================
-
-    // 1. Solicitar envío de email para recuperar contraseña
+    // ---------- RECUPERAR CONTRASEÑA ----------
     Route::post('/forgot-password', function (Request $request) {
         $request->validate(['email' => 'required|email']);
 
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+        $status = Password::sendResetLink($request->only('email'));
 
         return response()->json([
             'message' => $status === Password::RESET_LINK_SENT
-                ? 'Hemos enviado un correo de recuperación si el email está registrado.'
-                : 'No hemos podido enviar el correo de recuperación.'
+                ? 'Correo de recuperación enviado.'
+                : 'Error al enviar correo.'
         ]);
     });
 
-    // 2. Cambiar la contraseña desde el enlace del email
     Route::post('/reset-password', function (Request $request) {
         $request->validate([
             'token' => 'required',
@@ -132,17 +157,15 @@ Route::middleware(['web'])->group(function () {
 
         return response()->json([
             'message' => $status === Password::PASSWORD_RESET
-                ? 'La contraseña ha sido cambiada correctamente.'
+                ? 'Contraseña cambiada correctamente.'
                 : __($status),
         ]);
     });
 
-    // 3. Ruta que Laravel necesita para poner el enlace en el correo (¡ES OBLIGATORIA!)
     Route::get('/reset-password/{token}', function (Request $request, $token) {
-        // Redirige a tu frontend con token y email
         return redirect("http://localhost:5173/reset-password?token=$token&email=" . $request->query('email'));
     });
 
-    // --------- (Opcional) Ruta principal de bienvenida ----------
+    // ---------- BIENVENIDA ----------
     Route::get('/', fn () => view('welcome'));
 });
