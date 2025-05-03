@@ -4,11 +4,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 import "./Carrito.css";
 import { categorias } from "../data/categorias";
-import { productos } from "../data/productos";
 import ModalCarrito from "./ModalCarrito";
 
 const Carrito = () => {
   const navigate = useNavigate();
+
+  const [productos, setProductos] = useState([]);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [carrito, setCarrito] = useState([]);
@@ -17,52 +18,54 @@ const Carrito = () => {
   const [cantidad, setCantidad] = useState(1);
   const [showCarritoModal, setShowCarritoModal] = useState(false);
 
-  // Obtener usuario actual
   const usuario = JSON.parse(localStorage.getItem("usuario"));
 
   useEffect(() => {
     if (!usuario) navigate("/login");
   }, [usuario, navigate]);
 
+  useEffect(() => {
+    fetch("http://localhost:8000/productos", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => setProductos(data))
+      .catch(() => setProductos([]));
+  }, []);
+
   const handleCerrarSesion = async () => {
     try {
-      const response = await fetch("http://localhost:8000/logout", {
+      const res = await fetch("http://localhost:8000/logout", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
       });
-      if (response.ok) {
+      if (res.ok) {
         localStorage.removeItem("usuario");
         navigate("/login");
       } else {
         alert("Error al cerrar sesión en el servidor.");
       }
-    } catch (error) {
+    } catch (err) {
       alert("Error al cerrar sesión.");
     }
   };
 
-  const handleCategoriaClick = (nombreCategoria) => {
-    setCategoriaSeleccionada((prev) =>
-      prev === nombreCategoria ? null : nombreCategoria
-    );
+  const handleCategoriaClick = (nombre) => {
+    setCategoriaSeleccionada(prev => (prev === nombre ? null : nombre));
   };
 
-  const handleSearchChange = (event) => setSearchTerm(event.target.value);
+  const handleSearchChange = (e) => setSearchTerm(e.target.value);
 
   const productosFiltrados = productos.filter((producto) => {
     const categoria = categorias.find((cat) => cat.id === producto.id_categoria);
-    const matchesCategoria = categoriaSeleccionada
-      ? categoria.nombre === categoriaSeleccionada
-      : true;
-    const matchesBusqueda =
+    const matchCategoria = categoriaSeleccionada ? categoria?.nombre === categoriaSeleccionada : true;
+    const matchBusqueda =
       producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
       producto.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategoria && matchesBusqueda;
+    return matchCategoria && matchBusqueda;
   });
 
   const agregarAlCarrito = () => {
-    setCarrito((prev) => {
+    setCarrito(prev => {
       const existente = prev.find((item) => item.id === productoSeleccionado.id);
       if (existente) {
         if (existente.cantidad + cantidad <= 5) {
@@ -88,18 +91,13 @@ const Carrito = () => {
     setShowModal(true);
   };
 
+  const aumentarCantidad = () => setCantidad((prev) => (prev < 5 ? prev + 1 : prev));
+  const disminuirCantidad = () => setCantidad((prev) => (prev > 1 ? prev - 1 : prev));
   const handleCantidadChange = (e) => {
-    let nueva = Math.min(Math.max(1, parseInt(e.target.value, 10)), 5);
-    if (isNaN(nueva)) nueva = 1;
+    let nueva = parseInt(e.target.value, 10);
+    if (isNaN(nueva) || nueva < 1) nueva = 1;
+    if (nueva > 5) nueva = 5;
     setCantidad(nueva);
-  };
-
-  const aumentarCantidad = () => {
-    setCantidad((prev) => (prev < 5 ? prev + 1 : prev));
-  };
-
-  const disminuirCantidad = () => {
-    setCantidad((prev) => (prev > 1 ? prev - 1 : prev));
   };
 
   const contarProductosCarrito = () =>
@@ -117,9 +115,7 @@ const Carrito = () => {
     );
   };
 
-  const handleIrAlPanelUsuario = () => {
-    navigate("/panel-usuario");
-  };
+  const handleIrAlPanelUsuario = () => navigate("/panel-usuario");
 
   return (
     <>
@@ -127,7 +123,6 @@ const Carrito = () => {
         <div className="container-fluid d-flex flex-column align-items-center p-3">
           <div className="d-flex justify-content-between w-100 align-items-center">
             <img src="public/img/logo/logo.jpg" alt="Logo" className="logo" />
-
             <input
               type="text"
               className="form-control search-bar mx-3"
@@ -135,7 +130,6 @@ const Carrito = () => {
               value={searchTerm}
               onChange={handleSearchChange}
             />
-
             <div className="d-flex align-items-center">
               <FontAwesomeIcon
                 icon={faShoppingCart}
@@ -143,8 +137,6 @@ const Carrito = () => {
                 onClick={() => setShowCarritoModal(true)}
               />
               <span className="carrito-counter">{contarProductosCarrito()}</span>
-
-              {/* FOTO DE USUARIO */}
               <img
                 src={
                   usuario?.profile_image
@@ -162,14 +154,12 @@ const Carrito = () => {
                   border: "2px solid #ddd",
                 }}
                 onClick={handleIrAlPanelUsuario}
-                onError={e => { e.target.src = "/img/usuario/principal.png"; }}
+                onError={(e) => {
+                  e.target.src = "/img/usuario/principal.png";
+                }}
                 title="Ir a tu panel"
               />
-
-              <button
-                className="btn btn-danger btn-sm ms-3"
-                onClick={handleCerrarSesion}
-              >
+              <button className="btn btn-danger btn-sm ms-3" onClick={handleCerrarSesion}>
                 Cerrar sesión
               </button>
             </div>
@@ -196,7 +186,16 @@ const Carrito = () => {
             productosFiltrados.map((producto) => (
               <div key={producto.id} className="col-md-4 mb-4">
                 <div className="card producto-card">
-                  <img src={producto.img} className="card-img-top" alt={producto.nombre} />
+                <img
+  src={
+    producto.img.startsWith('uploads/')
+      ? `http://localhost:8000/${producto.img}`
+      : producto.img
+  }
+  className="card-img-top"
+  alt={producto.nombre}
+/>
+
                   <div className="card-body">
                     <h5 className="card-title">{producto.nombre}</h5>
                     <p className="card-text">{producto.descripcion}</p>
@@ -212,9 +211,7 @@ const Carrito = () => {
               </div>
             ))
           ) : (
-            <p className="text-center w-100">
-              No se encontraron productos que coincidan con esa búsqueda.
-            </p>
+            <p className="text-center w-100">No se encontraron productos.</p>
           )}
         </div>
       </main>
