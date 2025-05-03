@@ -19,7 +19,7 @@ const Login = () => {
         credentials: 'include',
       });
 
-      // 2️⃣ Enviar login
+      // 2️⃣ Enviar solicitud de inicio de sesión
       const response = await fetch('http://localhost:8000/login', {
         method: 'POST',
         headers: {
@@ -29,15 +29,25 @@ const Login = () => {
         body: JSON.stringify({ email, password }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem('usuario', JSON.stringify(data.user));
-        navigate('/carrito');
-      } else {
+      if (!response.ok) {
         setErrorMessage('Usuario no registrado y/o contraseña incorrecta');
+        return;
       }
+
+      const data = await response.json();
+      const user = data.user;
+
+      localStorage.setItem('usuario', JSON.stringify(user));
+
+      // 🔀 Redirigir según el rol del usuario
+      if (user.roles === 'admin') {
+        navigate('/panel-administrador');
+      } else {
+        navigate('/carrito');
+      }
+
     } catch (error) {
-      console.error('Error en el login:', error);
+      console.error('Error al iniciar sesión:', error);
       setErrorMessage('Hubo un problema con el servidor');
     }
   };
@@ -46,15 +56,18 @@ const Login = () => {
     <div className="container-fluid vh-100 d-flex align-items-center justify-content-center bg-light">
       <div className="row w-75 shadow-lg p-4 bg-white rounded">
         <div className="col-md-6 d-flex align-items-center justify-content-center">
-          <img src="/img/logo/logo.JPG" alt="Logo" className="img-fluid rounded shadow" style={{ maxWidth: '80%' }} />
+          <img
+            src="/img/logo/logo.JPG"
+            alt="Logo"
+            className="img-fluid rounded shadow"
+            style={{ maxWidth: '80%' }}
+          />
         </div>
         <div className="col-md-6">
-          <div className="col-12 text-center mb-4">
-            <h2 className="fw-bold" style={{ color: '#000' }}>Iniciar Sesión</h2>
-          </div>
+          <h2 className="text-center fw-bold mb-4">Iniciar Sesión</h2>
 
           {errorMessage && (
-            <div className="alert alert-danger text-center fw-bold" role="alert">
+            <div className="alert alert-danger text-center fw-bold">
               {errorMessage}
             </div>
           )}

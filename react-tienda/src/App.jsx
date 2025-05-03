@@ -7,10 +7,12 @@ import CarritoInvitado from './components/CarritoInvitado';
 import Pago from './components/Pago/Pago';
 import Facturas from './components/Pago/Facturas';
 import PanelUsuario from './components/PanelUsuario/PanelUsuario';
-import ResetPassword from './components/ResetPassword';   // <-- 👈 IMPORTA AQUÍ
+import ResetPassword from './components/ResetPassword';
+import ForgotPassword from './components/ForgotPassword';
+import PanelAdministrador from './components/PanelAdminsitradores/PanelAdministrador'; // 👈 NUEVO IMPORT
+
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import ForgotPassword from './components/ForgotPassword'; // 👈 AGREGA ESTA LÍNEA ARRIBA
 
 function App() {
   return (
@@ -25,8 +27,9 @@ function App() {
           <Route path="/pago" element={<Pago />} />
           <Route path="/factura" element={<Facturas />} />
           <Route path="/panel-usuario" element={<PanelUsuario />} />
-          <Route path="/reset-password" element={<ResetPassword />} /> {/* <-- 👈 NUEVA RUTA */}
-          <Route path="/forgot-password" element={<ForgotPassword />} /> {/* 👈 NUEVA RUTA */}
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/panel-administrador" element={<PanelAdministrador />} /> {/* 👈 NUEVA RUTA */}
         </Routes>
       </Router>
     </div>
