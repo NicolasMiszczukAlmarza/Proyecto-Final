@@ -1,4 +1,4 @@
 sqlite3 database.sqlite
 
-PRAGMA table_info(pedidos);
+PRAGMA table_info(productos);
 

@@ -9,6 +9,8 @@ use App\Models\User;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\PedidoController;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
+use App\Http\Controllers\ProductoController;
+use App\Models\Categoria;
 
 Route::middleware(['web'])->group(function () {
 
@@ -168,4 +170,22 @@ Route::middleware('auth:sanctum')->get('/usuarios', function () {
 
     // ---------- BIENVENIDA ----------
     Route::get('/', fn () => view('welcome'));
+
+    // ---------- Agregar Productos ----------
+    Route::middleware('auth:sanctum')->post('/agregar-producto', [ProductoController::class, 'store']);
+
+ // ---------- Ver Categoria ----------
+ Route::get('/categorias', function () {
+    return \App\Models\Categoria::all(['id', 'nombre']);
+});
+
+ // ---------- Ver Productos ----------
+Route::get('/productos', function () {
+    return \App\Models\Producto::all();
+});
+
+
+
+
+
 });

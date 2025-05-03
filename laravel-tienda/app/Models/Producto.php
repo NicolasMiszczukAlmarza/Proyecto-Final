@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class Producto
- * 
+ *
  * @property int $id
  * @property string $nombre
  * @property int $stock
@@ -14,8 +16,9 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $id_categoria
  * @property string $descripcion
  * @property string $img
- * 
+ *
  * @property Categoria $categoria
+ * @property Pedido[] $pedidos
  *
  * @package App\Models
  */
@@ -27,7 +30,7 @@ class Producto extends Model
     protected $casts = [
         'stock' => 'int',
         'precio' => 'float',
-        'id_categoria' => 'int'
+        'id_categoria' => 'int',
     ];
 
     protected $fillable = [
@@ -36,15 +39,15 @@ class Producto extends Model
         'precio',
         'id_categoria',
         'descripcion',
-        'img'
+        'img',
     ];
 
-    public function categoria()
+    public function categoria(): BelongsTo
     {
         return $this->belongsTo(Categoria::class, 'id_categoria');
     }
 
-    public function pedidos()
+    public function pedidos(): HasMany
     {
         return $this->hasMany(Pedido::class, 'id_producto');
     }

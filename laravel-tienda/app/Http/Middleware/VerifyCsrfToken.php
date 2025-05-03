@@ -22,5 +22,7 @@ class VerifyCsrfToken extends Middleware
         'reset-password',
         'convertir-admin',   // ✅ para promover usuarios
         'quitar-admin',      // ✅ para degradar usuarios
+        'agregar-producto', // ✅ para permitir POST sin token CSRF
+        '/productos',
     ];
 }
