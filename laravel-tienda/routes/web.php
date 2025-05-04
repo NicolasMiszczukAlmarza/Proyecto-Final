@@ -185,7 +185,58 @@ Route::get('/productos', function () {
 });
 
 
+// ---------- Editar Productos ----------
+Route::middleware('auth:sanctum')->post('/editar-producto/{id}', function (Request $request, $id) {
+    $producto = \App\Models\Producto::findOrFail($id);
 
+    $validated = $request->validate([
+        'nombre' => 'required|string|max:255',
+        'descripcion' => 'required|string',
+        'precio' => 'required|numeric',
+        'stock' => 'required|integer',
+        'id_categoria' => 'required|integer|exists:categorias,id',
+        'img' => 'nullable|image|max:2048',
+    ]);
+
+    if ($request->hasFile('img')) {
+        // Borrar imagen anterior si existe
+        if ($producto->img && file_exists(public_path($producto->img))) {
+            @unlink(public_path($producto->img));
+        }
+
+        $imagen = $request->file('img');
+        $nombreImagen = time() . '_' . $imagen->getClientOriginalName();
+        $imagen->move(public_path('uploads'), $nombreImagen);
+        $producto->img = 'uploads/' . $nombreImagen;
+    }
+
+    $producto->nombre = $validated['nombre'];
+    $producto->descripcion = $validated['descripcion'];
+    $producto->precio = $validated['precio'];
+    $producto->stock = $validated['stock'];
+    $producto->id_categoria = $validated['id_categoria'];
+    $producto->save();
+
+    return response()->json(['message' => 'Producto actualizado']);
+});
+
+// ---------- Eliminar Producto ----------
+Route::middleware('auth:sanctum')->delete('/eliminar-producto/{id}', function ($id) {
+    $producto = \App\Models\Producto::find($id);
+
+    if (!$producto) {
+        return response()->json(['message' => 'Producto no encontrado'], 404);
+    }
+
+    // Eliminar imagen del servidor si existe
+    if ($producto->img && file_exists(public_path($producto->img))) {
+        @unlink(public_path($producto->img));
+    }
+
+    $producto->delete();
+
+    return response()->json(['message' => 'Producto eliminado correctamente']);
+});
 
 
 });
