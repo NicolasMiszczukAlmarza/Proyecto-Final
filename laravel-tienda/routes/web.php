@@ -13,15 +13,13 @@ use App\Http\Controllers\ProductoController;
 use App\Models\Categoria;
 use Illuminate\Support\Facades\Log;
 use App\Models\Pedido;
-
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\StockController;
 
 Route::middleware(['web'])->group(function () {
 
-    // ---------- CSRF para Sanctum ----------
     Route::get('/sanctum/csrf-cookie', [CsrfCookieController::class, 'show'])->name('csrf-cookie');
 
-    // ---------- LOGIN ----------
     Route::post('/login', function (Request $request) {
         $credentials = $request->validate([
             'email' => 'required|email',
@@ -42,55 +40,36 @@ Route::middleware(['web'])->group(function () {
         ]);
     });
 
-    // ---------- LOGOUT ----------
     Route::post('/logout', function () {
         Auth::logout();
         return response()->json(['message' => 'Logout exitoso']);
     });
 
-    // ---------- REGISTRO ----------
     Route::post('/register', [RegisterController::class, 'store']);
 
-    // ---------- USUARIO ACTUAL ----------
-    Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-        return response()->json($request->user());
+    Route::middleware('auth:sanctum')->get('/user', fn (Request $request) => response()->json($request->user()));
+
+    Route::middleware('auth:sanctum')->get('/usuarios', function () {
+        return User::where('email', '!=', 'nicoadmin@admin.com')
+            ->get(['id', 'name', 'last_name', 'email', 'roles']);
     });
 
-    // ---------- OBTENER USUARIOS CON ROL NORMAL ----------
-    // ✅ Devuelve todos los usuarios excepto el admin principal
-Route::middleware('auth:sanctum')->get('/usuarios', function () {
-    return User::where('email', '!=', 'nicoadmin@admin.com')
-        ->get(['id', 'name', 'last_name', 'email', 'roles']);
-});
-
-
-    // ---------- CONVERTIR EN ADMIN ----------
     Route::middleware('auth:sanctum')->post('/convertir-admin', function (Request $request) {
-        $request->validate([
-            'email' => 'required|email|exists:users,email',
-        ]);
-
+        $request->validate(['email' => 'required|email|exists:users,email']);
         $user = User::where('email', $request->email)->first();
         $user->roles = 'admin';
         $user->save();
-
         return response()->json(['message' => 'Usuario promovido a administrador']);
     });
 
-    // ---------- QUITAR ADMIN Y CONVERTIR EN NORMAL ----------
     Route::middleware('auth:sanctum')->post('/quitar-admin', function (Request $request) {
-        $request->validate([
-            'email' => 'required|email|exists:users,email',
-        ]);
-
+        $request->validate(['email' => 'required|email|exists:users,email']);
         $user = User::where('email', $request->email)->first();
         $user->roles = 'normal';
         $user->save();
-
         return response()->json(['message' => 'Usuario convertido a rol normal']);
     });
 
-    // ---------- ACTUALIZAR USUARIO ----------
     Route::middleware('auth:sanctum')->post('/actualizar-usuario', function (Request $request) {
         $user = Auth::user();
 
@@ -109,17 +88,13 @@ Route::middleware('auth:sanctum')->get('/usuarios', function () {
             ) {
                 @unlink(public_path($user->profile_image));
             }
-
             $image = $request->file('profile_image');
             $imageName = time() . '_' . $image->getClientOriginalName();
             $image->move(public_path('uploads'), $imageName);
             $user->profile_image = 'uploads/' . $imageName;
         }
 
-        $user->name = $validated['name'];
-        $user->last_name = $validated['last_name'];
-        $user->address = $validated['address'];
-        $user->save();
+        $user->fill($validated)->save();
 
         return response()->json([
             'message' => 'Usuario actualizado correctamente',
@@ -127,23 +102,13 @@ Route::middleware('auth:sanctum')->get('/usuarios', function () {
         ]);
     });
 
-    // ---------- GUARDAR PEDIDO ----------
     Route::middleware('auth:sanctum')->post('/pedidos', [PedidoController::class, 'store']);
-
-    // ---------- PEDIDOS POR USUARIO ----------
     Route::middleware('auth:sanctum')->get('/pedidos-usuario/{correo}', [PedidoController::class, 'pedidosUsuario']);
 
-    // ---------- RECUPERAR CONTRASEÑA ----------
     Route::post('/forgot-password', function (Request $request) {
         $request->validate(['email' => 'required|email']);
-
         $status = Password::sendResetLink($request->only('email'));
-
-        return response()->json([
-            'message' => $status === Password::RESET_LINK_SENT
-                ? 'Correo de recuperación enviado.'
-                : 'Error al enviar correo.'
-        ]);
+        return response()->json(['message' => $status === Password::RESET_LINK_SENT ? 'Correo de recuperación enviado.' : 'Error al enviar correo.']);
     });
 
     Route::post('/reset-password', function (Request $request) {
@@ -155,102 +120,73 @@ Route::middleware('auth:sanctum')->get('/usuarios', function () {
 
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user, $password) {
-                $user->password = bcrypt($password);
-                $user->save();
-            }
+            fn ($user, $password) => $user->forceFill(['password' => bcrypt($password)])->save()
         );
 
-        return response()->json([
-            'message' => $status === Password::PASSWORD_RESET
-                ? 'Contraseña cambiada correctamente.'
-                : __($status),
-        ]);
+        return response()->json(['message' => $status === Password::PASSWORD_RESET ? 'Contraseña cambiada correctamente.' : __($status)]);
     });
 
     Route::get('/reset-password/{token}', function (Request $request, $token) {
         return redirect("http://localhost:5173/reset-password?token=$token&email=" . $request->query('email'));
     });
 
-    // ---------- BIENVENIDA ----------
     Route::get('/', fn () => view('welcome'));
 
-    // ---------- Agregar Productos ----------
     Route::middleware('auth:sanctum')->post('/agregar-producto', [ProductoController::class, 'store']);
+    Route::get('/categorias', fn () => Categoria::all(['id', 'nombre']));
+    Route::get('/productos', fn () => \App\Models\Producto::all());
 
- // ---------- Ver Categoria ----------
- Route::get('/categorias', function () {
-    return \App\Models\Categoria::all(['id', 'nombre']);
-});
+    Route::middleware('auth:sanctum')->post('/editar-producto/{id}', function (Request $request, $id) {
+        $producto = \App\Models\Producto::findOrFail($id);
+        $validated = $request->validate([
+            'nombre' => 'required|string|max:255',
+            'descripcion' => 'required|string',
+            'precio' => 'required|numeric',
+            'stock' => 'required|integer',
+            'id_categoria' => 'required|integer|exists:categorias,id',
+            'img' => 'nullable|image|max:2048',
+        ]);
 
- // ---------- Ver Productos ----------
-Route::get('/productos', function () {
-    return \App\Models\Producto::all();
-});
+        if ($request->hasFile('img')) {
+            if ($producto->img && file_exists(public_path($producto->img))) {
+                @unlink(public_path($producto->img));
+            }
+            $imagen = $request->file('img');
+            $nombreImagen = time() . '_' . $imagen->getClientOriginalName();
+            $imagen->move(public_path('uploads'), $nombreImagen);
+            $producto->img = 'uploads/' . $nombreImagen;
+        }
 
+        $producto->fill($validated)->save();
 
-// ---------- Editar Productos ----------
-Route::middleware('auth:sanctum')->post('/editar-producto/{id}', function (Request $request, $id) {
-    $producto = \App\Models\Producto::findOrFail($id);
+        return response()->json(['message' => 'Producto actualizado']);
+    });
 
-    $validated = $request->validate([
-        'nombre' => 'required|string|max:255',
-        'descripcion' => 'required|string',
-        'precio' => 'required|numeric',
-        'stock' => 'required|integer',
-        'id_categoria' => 'required|integer|exists:categorias,id',
-        'img' => 'nullable|image|max:2048',
-    ]);
-
-    if ($request->hasFile('img')) {
-        // Borrar imagen anterior si existe
+    Route::middleware('auth:sanctum')->delete('/eliminar-producto/{id}', function ($id) {
+        $producto = \App\Models\Producto::find($id);
+        if (!$producto) return response()->json(['message' => 'Producto no encontrado'], 404);
         if ($producto->img && file_exists(public_path($producto->img))) {
             @unlink(public_path($producto->img));
         }
+        $producto->delete();
+        return response()->json(['message' => 'Producto eliminado correctamente']);
+    });
 
-        $imagen = $request->file('img');
-        $nombreImagen = time() . '_' . $imagen->getClientOriginalName();
-        $imagen->move(public_path('uploads'), $nombreImagen);
-        $producto->img = 'uploads/' . $nombreImagen;
-    }
+    Route::middleware(['web', 'auth:sanctum'])->post('/renovar-stock', [StockController::class, 'renovar']);
+    Route::middleware('auth:sanctum')->get('/resumen-financiero', [AdminController::class, 'resumenFinanciero']);
 
-    $producto->nombre = $validated['nombre'];
-    $producto->descripcion = $validated['descripcion'];
-    $producto->precio = $validated['precio'];
-    $producto->stock = $validated['stock'];
-    $producto->id_categoria = $validated['id_categoria'];
-    $producto->save();
+    // ---------- ELIMINAR CUENTA ----------
+    Route::middleware('auth:sanctum')->delete('/eliminar-usuario', function (Request $request) {
+        $request->validate(['email' => 'required|email']);
+        $user = User::where('email', $request->email)->first();
+        if (!$user) return response()->json(['message' => 'Usuario no encontrado'], 404);
 
-    return response()->json(['message' => 'Producto actualizado']);
-});
+        if ($user->profile_image && $user->profile_image !== 'img/usuario/principal.png' && file_exists(public_path($user->profile_image))) {
+            @unlink(public_path($user->profile_image));
+        }
 
-// ---------- Eliminar Producto ----------
-Route::middleware('auth:sanctum')->delete('/eliminar-producto/{id}', function ($id) {
-    $producto = \App\Models\Producto::find($id);
-
-    if (!$producto) {
-        return response()->json(['message' => 'Producto no encontrado'], 404);
-    }
-
-    // Eliminar imagen del servidor si existe
-    if ($producto->img && file_exists(public_path($producto->img))) {
-        @unlink(public_path($producto->img));
-    }
-
-    $producto->delete();
-
-    return response()->json(['message' => 'Producto eliminado correctamente']);
-});
-
-
-
-// ---------- Renovar Producto ----------
-
-
-
-Route::middleware(['web', 'auth:sanctum'])->post('/renovar-stock', [StockController::class, 'renovar']);
-
-
-
+        $user->delete();
+        return response()->json(['message' => 'Cuenta eliminada correctamente.']);
+    });
 
 });

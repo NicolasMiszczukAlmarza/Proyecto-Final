@@ -3,37 +3,46 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Producto;
-use App\Models\Pedido;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use App\Models\Producto;
 
 class StockController extends Controller
 {
     public function renovar(Request $request)
     {
         $validated = $request->validate([
-            'id' => 'required|integer|exists:productos,id',
+            'id'       => 'required|exists:productos,id',
             'cantidad' => 'required|integer|min:1',
-            'order_id' => 'nullable|string',
         ]);
 
-        $producto = Producto::findOrFail($validated['id']);
-        $producto->stock += $validated['cantidad'];
+        // ─── 1) Actualizar stock del producto ──────────────────────────────
+        $producto            = Producto::findOrFail($validated['id']);
+        $producto->stock    += $validated['cantidad'];
         $producto->save();
 
-        Pedido::create([
-            'order_id' => $validated['order_id'] ?? 'admin_stock_' . uniqid(),
-            'id_producto' => $producto->id,
-            'user_id' => Auth::id(),
-            'correo' => Auth::user()->email,
-            'cantidad' => $validated['cantidad'],
-            'precio' => $producto->precio,
-            'precioProducto' => $producto->precio * $validated['cantidad'],
-            'descuento' => 0,
-            'precioTotal' => $producto->precio * $validated['cantidad'],
-            'fecha' => now(),
+        // ─── 2) Registrar la “compra” interna como pedido de admin ─────────
+        $admin      = Auth::user();                      // el admin conectado
+        $orderId    = 'admin_stock_' . uniqid();         // id único
+        $precioUnit = $producto->precio;                 // coste = PVP; cámbialo si usas otro campo
+        $totalLine  = $precioUnit * $validated['cantidad'];
+
+        DB::table('pedidos')->insert([
+            'order_id'       => $orderId,
+            'id_producto'    => $producto->id,
+            'user_id'        => $admin->id,
+            'correo'         => $admin->email,
+            'cantidad'       => $validated['cantidad'],
+            'precio'         => $precioUnit,
+            'precioProducto' => $totalLine,
+            'descuento'      => 0,
+            'precioTotal'    => $totalLine,
+            'fecha'          => now(),
         ]);
 
-        return response()->json(['message' => 'Stock actualizado correctamente']);
+        return response()->json([
+            'message' => 'Stock renovado y movimiento registrado',
+            'nuevoStock' => $producto->stock,
+        ]);
     }
 }
