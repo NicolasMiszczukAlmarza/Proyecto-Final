@@ -26,6 +26,8 @@ class VerifyCsrfToken extends Middleware
         'editar-producto/*',
         'productos',
         'eliminar-producto/*',
+        // 'renovar-stock', ❌ ELIMINA ESTA LÍNEA
     ];
+    
     
 }

@@ -11,6 +11,10 @@ use App\Http\Controllers\PedidoController;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 use App\Http\Controllers\ProductoController;
 use App\Models\Categoria;
+use Illuminate\Support\Facades\Log;
+use App\Models\Pedido;
+
+use App\Http\Controllers\StockController;
 
 Route::middleware(['web'])->group(function () {
 
@@ -237,6 +241,16 @@ Route::middleware('auth:sanctum')->delete('/eliminar-producto/{id}', function ($
 
     return response()->json(['message' => 'Producto eliminado correctamente']);
 });
+
+
+
+// ---------- Renovar Producto ----------
+
+
+
+Route::middleware(['web', 'auth:sanctum'])->post('/renovar-stock', [StockController::class, 'renovar']);
+
+
 
 
 });
