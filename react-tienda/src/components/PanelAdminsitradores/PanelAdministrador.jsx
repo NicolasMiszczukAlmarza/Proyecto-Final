@@ -4,7 +4,6 @@ import './PanelAdministrador.css';
 
 const PanelAdministrador = () => {
   const navigate = useNavigate();
-
   const [usuario, setUsuario] = useState(null);
   const [usuarios, setUsuarios] = useState([]);
   const [categorias, setCategorias] = useState([]);
@@ -27,13 +26,14 @@ const PanelAdministrador = () => {
   }, [navigate]);
 
   useEffect(() => {
-    if (seleccion === 'Convertir a Admin' || seleccion === 'Convertir a Normal') {
+    if (['Convertir a Admin', 'Convertir a Normal'].includes(seleccion)) {
       fetch('http://localhost:8000/usuarios', { credentials: 'include' })
         .then(res => res.json())
         .then(setUsuarios)
         .catch(() => setUsuarios([]));
     }
-    if (seleccion === 'Editar producto') {
+
+    if (['Editar producto', 'Renovar Stock'].includes(seleccion)) {
       fetch('http://localhost:8000/productos', { credentials: 'include' })
         .then(res => res.json())
         .then(setProductos)
@@ -130,6 +130,52 @@ const PanelAdministrador = () => {
     }
   };
 
+  const renovarStockProducto = async (producto) => {
+    try {
+      // Paso 1: Obtener cookie CSRF
+      await fetch('http://localhost:8000/sanctum/csrf-cookie', { credentials: 'include' });
+  
+      // Paso 2: Leer el token XSRF desde cookies
+      const getCookie = (name) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+      };
+  
+      const token = getCookie('XSRF-TOKEN');
+  
+      // Paso 3: Enviar la petición con el token
+      const res = await fetch('http://localhost:8000/renovar-stock', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-XSRF-TOKEN': decodeURIComponent(token),
+          'Accept': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          id: producto.id,
+          cantidad: 10,
+          order_id: null
+        })
+      });
+  
+      if (!res.ok) throw new Error();
+  
+      setMensaje({
+        tipo: 'success',
+        texto: `Stock de "${producto.nombre}" incrementado en 10 unidades.`
+      });
+      setRecargarProductos(prev => !prev);
+    } catch {
+      setMensaje({
+        tipo: 'error',
+        texto: 'Error al renovar stock'
+      });
+    }
+  };
+  
+
   const renderUsuarios = (tipo) => (
     <div className="container">
       <h5>{tipo === 'admin' ? 'Administradores' : 'Usuarios normales'}</h5>
@@ -153,11 +199,33 @@ const PanelAdministrador = () => {
     </div>
   );
 
+  const renderRenovarStock = () => {
+    const productosBajos = productos.filter(p => p.stock < 10);
+    return (
+      <div className="container">
+        <h4>Renovar Stock (menos de 10 unidades)</h4>
+        {productosBajos.length === 0 ? (
+          <p className="text-muted">No hay productos con stock bajo.</p>
+        ) : (
+          <ul className="list-group">
+            {productosBajos.map(p => (
+              <li key={p.id} className="list-group-item d-flex justify-content-between align-items-center">
+                <span>{p.nombre} — Stock actual: {p.stock}</span>
+                <button className="btn btn-sm btn-warning" onClick={() => renovarStockProducto(p)}>+10 unidades</button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    );
+  };
+
   const renderContenido = () => {
     if (seleccion === 'Convertir a Admin') return renderUsuarios('normal');
     if (seleccion === 'Convertir a Normal') return renderUsuarios('admin');
     if (seleccion === 'Añadir producto') return renderAgregarProducto();
     if (seleccion === 'Editar producto') return renderEditarProducto();
+    if (seleccion === 'Renovar Stock') return renderRenovarStock();
     return <p>Seleccione una opción</p>;
   };
 
@@ -188,7 +256,6 @@ const PanelAdministrador = () => {
           <option value="">Todas las categorías</option>
           {categorias.map(cat => <option key={cat.id} value={cat.id}>{cat.nombre}</option>)}
         </select>
-
         {!productoEditando ? (
           <ul className="list-group">
             {filtrados.map(p => (
@@ -238,7 +305,7 @@ const PanelAdministrador = () => {
     <div className="panel-container d-flex">
       <div className="panel-sidebar">
         <h5>Panel Admin</h5>
-        {[ 'Convertir a Admin', 'Convertir a Normal', 'Añadir producto', 'Editar producto', 'Cerrar sesión' ].map(op => (
+        {['Convertir a Admin', 'Convertir a Normal', 'Añadir producto', 'Editar producto', 'Renovar Stock', 'Cerrar sesión'].map(op => (
           <button key={op} className={`btn ${seleccion === op ? 'btn-active' : 'btn-outline-light'} mb-2`} onClick={() => {
             if (op === 'Cerrar sesión') {
               localStorage.removeItem('usuario');
