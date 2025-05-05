@@ -57,8 +57,16 @@ const CarritoInvitado = () => {
       <header className="header">
         <div className="header-inner">
           <div className="header-left">
-            <img src="public/img/logo/logo.jpg" alt="Logo" className="logo" />
-          </div>
+  <img
+    src="/img/logo/logo.jpg"
+    alt="Logo"
+    className="logo"
+    onError={(e) => {
+      e.target.src = "/img/logo/nico.PNG"; // fallback si no carga
+    }}
+  />
+</div>
+
           <div className="header-center">
             <input
               type="text"

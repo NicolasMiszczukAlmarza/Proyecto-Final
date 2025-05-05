@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
-import "./Carrito.css";
 import { categorias } from "../data/categorias";
 import ModalCarrito from "./ModalCarrito";
+import "./Carrito.css";
 
 const Carrito = () => {
   const navigate = useNavigate();
@@ -44,28 +44,36 @@ const Carrito = () => {
       } else {
         alert("Error al cerrar sesión en el servidor.");
       }
-    } catch (err) {
+    } catch {
       alert("Error al cerrar sesión.");
     }
   };
 
   const handleCategoriaClick = (nombre) => {
-    setCategoriaSeleccionada(prev => (prev === nombre ? null : nombre));
+    setCategoriaSeleccionada((prev) => (prev === nombre ? null : nombre));
+    setSearchTerm(""); // limpiar búsqueda al cambiar de categoría
   };
 
-  const handleSearchChange = (e) => setSearchTerm(e.target.value);
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCategoriaSeleccionada(null); // 🔥 desmarca la categoría al buscar
+  };
 
-  const productosFiltrados = productos.filter((producto) => {
-    const categoria = categorias.find((cat) => cat.id === producto.id_categoria);
-    const matchCategoria = categoriaSeleccionada ? categoria?.nombre === categoriaSeleccionada : true;
-    const matchBusqueda =
-      producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      producto.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchCategoria && matchBusqueda;
-  });
+  const productosFiltrados = useMemo(() => {
+    return productos.filter((producto) => {
+      const categoria = categorias.find((cat) => cat.id === producto.id_categoria);
+      const matchCategoria = categoriaSeleccionada
+        ? categoria?.nombre.toLowerCase() === categoriaSeleccionada.toLowerCase()
+        : true;
+      const matchBusqueda =
+        producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        producto.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
+      return matchCategoria && matchBusqueda;
+    });
+  }, [productos, categoriaSeleccionada, searchTerm]);
 
   const agregarAlCarrito = () => {
-    setCarrito(prev => {
+    setCarrito((prev) => {
       const existente = prev.find((item) => item.id === productoSeleccionado.id);
       if (existente) {
         if (existente.cantidad + cantidad <= 5) {
@@ -83,12 +91,6 @@ const Carrito = () => {
       }
     });
     setShowModal(false);
-  };
-
-  const handleAñadirAlCarrito = (producto) => {
-    setProductoSeleccionado(producto);
-    setCantidad(1);
-    setShowModal(true);
   };
 
   const aumentarCantidad = () => setCantidad((prev) => (prev < 5 ? prev + 1 : prev));
@@ -115,98 +117,93 @@ const Carrito = () => {
     );
   };
 
+  const handleAñadirAlCarrito = (producto) => {
+    setProductoSeleccionado(producto);
+    setCantidad(1);
+    setShowModal(true);
+  };
+
   const handleIrAlPanelUsuario = () => navigate("/panel-usuario");
 
   return (
     <>
-      <header className="header fixed-top">
-        <div className="container-fluid d-flex flex-column align-items-center p-3">
-          <div className="d-flex justify-content-between w-100 align-items-center">
-            <img src="public/img/logo/logo.jpg" alt="Logo" className="logo" />
-            <input
-              type="text"
-              className="form-control search-bar mx-3"
-              placeholder="Buscar productos..."
-              value={searchTerm}
-              onChange={handleSearchChange}
+      <header className="header">
+        <div className="header-inner">
+          <img
+            src="/img/logo/logo.PNG"
+            alt="Logo"
+            className="logo"
+            onClick={() => navigate("/")}
+            style={{ cursor: "pointer" }}
+          />
+          <input
+            type="text"
+            className="search-bar"
+            placeholder="Buscar productos..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
+          <div className="user-actions">
+            <FontAwesomeIcon
+              icon={faShoppingCart}
+              className="icono-carrito"
+              onClick={() => setShowCarritoModal(true)}
             />
-            <div className="d-flex align-items-center">
-              <FontAwesomeIcon
-                icon={faShoppingCart}
-                className="icono-carrito mx-2"
-                onClick={() => setShowCarritoModal(true)}
-              />
-              <span className="carrito-counter">{contarProductosCarrito()}</span>
-              <img
-                src={
-                  usuario?.profile_image
-                    ? `http://localhost:8000/${usuario.profile_image}`
-                    : "/img/usuario/principal.png"
-                }
-                alt="Perfil"
-                className="icono-usuario mx-2"
-                style={{
-                  width: "35px",
-                  height: "35px",
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  cursor: "pointer",
-                  border: "2px solid #ddd",
-                }}
-                onClick={handleIrAlPanelUsuario}
-                onError={(e) => {
-                  e.target.src = "/img/usuario/principal.png";
-                }}
-                title="Ir a tu panel"
-              />
-              <button className="btn btn-danger btn-sm ms-3" onClick={handleCerrarSesion}>
-                Cerrar sesión
-              </button>
-            </div>
+            <span className="carrito-counter">{contarProductosCarrito()}</span>
+            <img
+              src={
+                usuario?.profile_image
+                  ? `http://localhost:8000/${usuario.profile_image}`
+                  : "/img/usuario/principal.png"
+              }
+              alt="Perfil"
+              className="icono-usuario"
+              onClick={handleIrAlPanelUsuario}
+              onError={(e) => {
+                e.target.src = "/img/usuario/principal.png";
+              }}
+              title="Ir a tu panel"
+            />
+            <button className="btn btn-danger btn-sm" onClick={handleCerrarSesion}>
+              Cerrar sesión
+            </button>
           </div>
-          <nav className="categorias-menu w-100">
-            <div className="container-fluid categorias-container d-flex justify-content-center">
-              {categorias.map((cat) => (
-                <span
-                  key={cat.id}
-                  className={`categoria ${categoriaSeleccionada === cat.nombre ? "selected" : ""}`}
-                  onClick={() => handleCategoriaClick(cat.nombre)}
-                >
-                  {cat.nombre}
-                </span>
-              ))}
-            </div>
-          </nav>
         </div>
+        <nav className="categorias-menu">
+          <div className="categorias-container">
+            {categorias.map((cat) => (
+              <span
+                key={cat.id}
+                className={`categoria ${categoriaSeleccionada === cat.nombre ? "selected" : ""}`}
+                onClick={() => handleCategoriaClick(cat.nombre)}
+              >
+                {cat.nombre}
+              </span>
+            ))}
+          </div>
+        </nav>
       </header>
 
-      <main className="container productos-container mt-5 pt-5">
-        <div className="row productos-lista">
+      <main className="productos-container">
+        <div className="productos-lista">
           {productosFiltrados.length > 0 ? (
             productosFiltrados.map((producto) => (
-              <div key={producto.id} className="col-md-4 mb-4">
-                <div className="card producto-card">
+              <div key={producto.id} className="producto-card">
                 <img
-  src={
-    producto.img.startsWith('uploads/')
-      ? `http://localhost:8000/${producto.img}`
-      : producto.img
-  }
-  className="card-img-top"
-  alt={producto.nombre}
-/>
-
-                  <div className="card-body">
-                    <h5 className="card-title">{producto.nombre}</h5>
-                    <p className="card-text">{producto.descripcion}</p>
-                    <h6 className="text-primary">${producto.precio}</h6>
-                    <button
-                      className="btn btn-success w-100"
-                      onClick={() => handleAñadirAlCarrito(producto)}
-                    >
-                      Añadir al carrito
-                    </button>
-                  </div>
+                  src={`/${producto.img}`}
+                  className="card-img-top"
+                  alt={producto.nombre}
+                />
+                <div className="card-body">
+                  <h5 className="card-title">{producto.nombre}</h5>
+                  <p className="card-text">{producto.descripcion}</p>
+                  <h6 className="card-price">{producto.precio}€</h6>
+                  <button
+                    className="btn btn-success w-100"
+                    onClick={() => handleAñadirAlCarrito(producto)}
+                  >
+                    Añadir al carrito
+                  </button>
                 </div>
               </div>
             ))
@@ -216,7 +213,6 @@ const Carrito = () => {
         </div>
       </main>
 
-      {/* Modal de cantidad */}
       {showModal && (
         <div className="modal fade show" style={{ display: "block" }}>
           <div className="modal-dialog">
@@ -227,7 +223,7 @@ const Carrito = () => {
               </div>
               <div className="modal-body text-center">
                 <img
-                  src={productoSeleccionado.img}
+                  src={`/${productoSeleccionado.img}`}
                   alt={productoSeleccionado.nombre}
                   className="img-fluid"
                   style={{ width: "100px", height: "100px", objectFit: "cover" }}
@@ -260,7 +256,6 @@ const Carrito = () => {
         </div>
       )}
 
-      {/* Modal del carrito */}
       {showCarritoModal && (
         <ModalCarrito
           carrito={carrito}

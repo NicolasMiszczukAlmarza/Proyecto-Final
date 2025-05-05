@@ -57,11 +57,16 @@ const Login = () => {
       <div className="row w-75 shadow-lg p-4 bg-white rounded">
         <div className="col-md-6 d-flex align-items-center justify-content-center">
           <img
-            src="/img/logo/logo.JPG"
+            src="/img/logo/logo.PNG"
             alt="Logo"
             className="img-fluid rounded shadow"
-            style={{ maxWidth: '80%' }}
+            style={{ maxWidth: '80%', cursor: 'pointer' }}
+            onClick={() => navigate("/")}
+            onError={(e) => {
+              e.target.src = "/img/logo/nico.PNG";
+            }}
           />
+
         </div>
         <div className="col-md-6">
           <h2 className="text-center fw-bold mb-4">Iniciar Sesión</h2>

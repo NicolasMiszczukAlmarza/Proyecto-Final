@@ -76,8 +76,24 @@ const Formulario = () => {
 
         {/* Columna de la imagen */}
         <div className="col-md-6 d-flex align-items-center justify-content-center">
-          <img src="/img/logo/logo.JPG" alt="Logo" className="img-fluid rounded shadow" style={{ maxWidth: '80%' }} />
-        </div>
+  <img
+    src="/img/logo/logo.PNG"
+    alt="Logo"
+    className="img-fluid rounded shadow"
+    style={{
+      maxWidth: '90%',
+      maxHeight: '300px',
+      objectFit: 'contain',
+      cursor: 'pointer'
+    }}
+    onClick={() => navigate("/")}
+    onError={(e) => {
+      e.target.src = "/img/logo/nico.PNG";
+    }}
+  />
+</div>
+
+
 
         {/* Columna del formulario */}
         <div className="col-md-6">
