@@ -105,11 +105,23 @@ const PanelAdministrador = () => {
         }, body: JSON.stringify({ email: userToDelete.email }),
       });
       if (!resp.ok) throw new Error((await resp.json()).message);
-      setUsuarios(prev => prev.filter(u => u.email !== userToDelete.email));
-      showMsg('Usuario eliminado');
-    } catch (err) { showMsg(err.message || 'Error', 'danger'); }
-    finally { setDeleteModalVisible(false); setUserToDelete(null); }
+  
+      // 👇 Aquí manejamos el cierre de sesión si se elimina a sí mismo
+      if (userToDelete.email === usuario.email) {
+        localStorage.removeItem('usuario');
+        navigate('/login');
+      } else {
+        setUsuarios(prev => prev.filter(u => u.email !== userToDelete.email));
+        showMsg('Usuario eliminado');
+      }
+    } catch (err) {
+      showMsg(err.message || 'Error', 'danger');
+    } finally {
+      setDeleteModalVisible(false);
+      setUserToDelete(null);
+    }
   };
+  
 
   /* ----------------------- PRODUCTS ------------------------------ */
   const handleProductoChange = (e, setFunc) => {
