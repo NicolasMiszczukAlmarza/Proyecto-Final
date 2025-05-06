@@ -126,9 +126,16 @@ const PanelAdministrador = () => {
         setUsuarios(prev => prev.filter(u => u.email !== userToDelete.email));
         showMsg('Usuario eliminado');
       }
-    } catch (err) {
-      showMsg(err.message || 'Error', 'danger');
-    } finally {
+    }catch (err) {
+      if (err instanceof Response) {
+        const errorData = await err.json();
+        console.error("Errores de validación:", errorData.errors);
+        showMsg(Object.values(errorData.errors).flat().join(', '), 'danger');
+      } else {
+        showMsg(err.message || 'Error al editar', 'danger');
+      }
+    }
+     finally {
       setDeleteModalVisible(false);
       setUserToDelete(null);
     }
@@ -160,22 +167,37 @@ const PanelAdministrador = () => {
 
   const handleEditarProducto = async () => {
     if (!productoEditando) return;
+  
     const formData = new FormData();
     Object.entries(productoEditando).forEach(([k, v]) => formData.append(k, v));
-
+  
     try {
       await fetch('http://localhost:8000/sanctum/csrf-cookie', { credentials: 'include' });
+  
       const resp = await fetch(`http://localhost:8000/editar-producto/${productoEditando.id}`, {
-        method: 'POST', credentials: 'include', headers: { 'X-XSRF-TOKEN': csrfToken() }, body: formData,
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'X-XSRF-TOKEN': csrfToken(),
+          'Accept': 'application/json' // ✅ Muy importante
+        },
+        body: formData,
       });
+      
+  
       if (!resp.ok) throw new Error((await resp.json()).message);
+  
       showMsg('Producto actualizado');
-      setProductoEditando(null);
       setRecargarProductos(prev => !prev);
+  
+      // ✅ Aquí cerramos el modal tras éxito
+      setProductoEditando(null);
     } catch (err) {
       showMsg(err.message || 'Error al editar', 'danger');
     }
   };
+  
+  
 
   const confirmarEliminarProducto = (p) => { setProductoEliminar(p); setDeleteProductoVisible(true); };
 
