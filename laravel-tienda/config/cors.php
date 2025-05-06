@@ -4,103 +4,76 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | CORS Configuration
+    | Paths that will receive CORS headers
     |--------------------------------------------------------------------------
-    |
-    | You may define the paths that will be accessible via CORS here.
-    | For maximum compatibility, use a wildcard ('*') when necessary.
-    |
     */
-
-    'paths' => ['api/*', 'login', 'logout', 'register', 'sanctum/csrf-cookie', 'pedidos', '*'],
+    'paths' => [
+        'api/*',
+        'login',
+        'logout',
+        'register',
+        'sanctum/csrf-cookie',
+        'pedidos',
+        'productos',
+        'editar-producto/*',
+        'eliminar-producto/*',
+        'agregar-producto',
+        'usuarios',
+        'convertir-admin',
+        'quitar-admin',
+        'actualizar-usuario',
+        'eliminar-usuario',
+        'resumen-financiero',
+        '*'
+    ],
 
     /*
     |--------------------------------------------------------------------------
-    | Allowed Methods
+    | Allowed HTTP methods
     |--------------------------------------------------------------------------
-    |
-    | Specify which HTTP methods are allowed for CORS requests.
-    | You can set it to ['*'] to allow all methods.
-    |
     */
-
-    'allowed_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    'allowed_methods' => ['*'],
 
     /*
     |--------------------------------------------------------------------------
-    | Allowed Origins
+    | Allowed Origins (NO '*' if credentials are true)
     |--------------------------------------------------------------------------
-    |
-    | Here you can specify which origins are allowed to access your API.
-    | Use ['*'] to accept requests from any origin.
-    |
     */
-
-    'allowed_origins' => ['http://localhost:5173', 'http://localhost:3000', '*'],
+    'allowed_origins' => ['http://localhost:5173'],
 
     /*
     |--------------------------------------------------------------------------
-    | Allowed Origins Patterns
+    | Origin patterns (not used here)
     |--------------------------------------------------------------------------
-    |
-    | This is an additional check based on patterns for allowed origins.
-    |
     */
-
     'allowed_origins_patterns' => [],
 
     /*
     |--------------------------------------------------------------------------
     | Allowed Headers
     |--------------------------------------------------------------------------
-    |
-    | Specify which headers are allowed during CORS requests.
-    |
     */
-
-'allowed_headers' => [
-    'Content-Type',
-    'X-Auth-Token',
-    'Authorization',
-    'Origin',
-    'X-Requested-With',
-    'Accept',
-    'Access-Control-Allow-Credentials',
-    'X-XSRF-TOKEN', // 👈 Agrega este
-],
-
+    'allowed_headers' => ['*'],
 
     /*
     |--------------------------------------------------------------------------
-    | Exposed Headers
+    | Headers that will be exposed to the browser
     |--------------------------------------------------------------------------
-    |
-    | Specify headers that the browser is allowed to access from the response.
-    |
     */
-
-    'exposed_headers' => ['Authorization', 'Content-Type', 'X-Auth-Token', 'Origin'],
+    'exposed_headers' => [],
 
     /*
     |--------------------------------------------------------------------------
-    | Max Age
+    | Maximum age (in seconds) the browser should cache the preflight request
     |--------------------------------------------------------------------------
-    |
-    | The maximum duration in seconds that the response can be cached by the client.
-    |
     */
-
-    'max_age' => 86400,
+    'max_age' => 0,
 
     /*
     |--------------------------------------------------------------------------
-    | Supports Credentials
+    | Allow cookies and credentials (required for sanctum)
     |--------------------------------------------------------------------------
-    |
-    | Set to true to allow sending cookies or HTTP authentication along with the request.
-    |
     */
-
     'supports_credentials' => true,
 
 ];
