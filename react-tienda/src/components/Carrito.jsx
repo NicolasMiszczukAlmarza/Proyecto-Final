@@ -6,6 +6,22 @@ import { categorias } from "../data/categorias";
 import ModalCarrito from "./ModalCarrito";
 import "./Carrito.css";
 
+/* ------------ CONFIGURA TU BACKEND ------------- */
+const BACKEND = "http://localhost:8000"; // cámbialo si tu API vive en otro host/puerto
+
+/* ---- Convierte la ruta almacenada en BD a una URL válida ---- */
+const getImagenUrl = (ruta) => {
+  if (!ruta) return "/img/no-image.png";
+  if (/^https?:\/\//i.test(ruta)) return ruta; // ya es absoluta
+
+  const clean = ruta.startsWith("/") ? ruta.slice(1) : ruta;
+  // todo lo que venga de "uploads/**" lo sirve Laravel
+  if (clean.startsWith("uploads")) return `${BACKEND}/${encodeURI(clean)}`;
+
+  // el resto (img/**) lo sirve React (public/)
+  return `/${encodeURI(clean)}`;
+};
+
 const Carrito = () => {
   const navigate = useNavigate();
 
@@ -20,30 +36,30 @@ const Carrito = () => {
 
   const usuario = JSON.parse(localStorage.getItem("usuario"));
 
+  /* ---------------- EFECTOS ----------------- */
   useEffect(() => {
     if (!usuario) navigate("/login");
   }, [usuario, navigate]);
 
   useEffect(() => {
-    fetch("http://localhost:8000/productos", { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => setProductos(data))
+    fetch(`${BACKEND}/productos`, { credentials: "include" })
+      .then((r) => r.json())
+      .then(setProductos)
       .catch(() => setProductos([]));
   }, []);
 
+  /* -------------- HANDLERS ------------------ */
   const handleCerrarSesion = async () => {
     try {
-      const res = await fetch("http://localhost:8000/logout", {
+      const r = await fetch(`${BACKEND}/logout`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
       });
-      if (res.ok) {
+      if (r.ok) {
         localStorage.removeItem("usuario");
         navigate("/login");
-      } else {
-        alert("Error al cerrar sesión en el servidor.");
-      }
+      } else alert("Error al cerrar sesión en el servidor.");
     } catch {
       alert("Error al cerrar sesión.");
     }
@@ -51,91 +67,70 @@ const Carrito = () => {
 
   const handleCategoriaClick = (nombre) => {
     setCategoriaSeleccionada((prev) => (prev === nombre ? null : nombre));
-    setSearchTerm(""); // limpiar búsqueda al cambiar de categoría
+    setSearchTerm("");
   };
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setCategoriaSeleccionada(null); // 🔥 desmarca la categoría al buscar
+    setCategoriaSeleccionada(null);
   };
 
+  /* ----------- FILTRADO ------------------ */
   const productosFiltrados = useMemo(() => {
-    return productos.filter((producto) => {
-      const categoria = categorias.find((cat) => cat.id === producto.id_categoria);
-      const matchCategoria = categoriaSeleccionada
-        ? categoria?.nombre.toLowerCase() === categoriaSeleccionada.toLowerCase()
+    return productos.filter((p) => {
+      const cat = categorias.find((c) => c.id === p.id_categoria);
+      const okCat = categoriaSeleccionada
+        ? cat?.nombre.toLowerCase() === categoriaSeleccionada.toLowerCase()
         : true;
-      const matchBusqueda =
-        producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        producto.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
-      return matchCategoria && matchBusqueda;
+      const okSearch =
+        p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
+      return okCat && okSearch;
     });
   }, [productos, categoriaSeleccionada, searchTerm]);
 
+  /* ----------- CARRITO ------------------ */
   const agregarAlCarrito = () => {
     setCarrito((prev) => {
-      const existente = prev.find((item) => item.id === productoSeleccionado.id);
-      if (existente) {
-        if (existente.cantidad + cantidad <= 5) {
-          return prev.map((item) =>
-            item.id === productoSeleccionado.id
-              ? { ...item, cantidad: item.cantidad + cantidad }
-              : item
+      const ex = prev.find((i) => i.id === productoSeleccionado.id);
+      if (ex) {
+        if (ex.cantidad + cantidad <= 5) {
+          return prev.map((i) =>
+            i.id === ex.id ? { ...i, cantidad: i.cantidad + cantidad } : i
           );
-        } else {
-          alert("No puedes agregar más de 5 unidades.");
-          return prev;
         }
-      } else {
-        return [...prev, { ...productoSeleccionado, cantidad }];
+        alert("Máximo 5 unidades por producto.");
+        return prev;
       }
+      return [...prev, { ...productoSeleccionado, cantidad }];
     });
     setShowModal(false);
   };
 
-  const aumentarCantidad = () => setCantidad((prev) => (prev < 5 ? prev + 1 : prev));
-  const disminuirCantidad = () => setCantidad((prev) => (prev > 1 ? prev - 1 : prev));
-  const handleCantidadChange = (e) => {
-    let nueva = parseInt(e.target.value, 10);
-    if (isNaN(nueva) || nueva < 1) nueva = 1;
-    if (nueva > 5) nueva = 5;
-    setCantidad(nueva);
-  };
+  const eliminarProductoCarrito = (id) =>
+    setCarrito((prev) => prev.filter((i) => i.id !== id));
 
-  const contarProductosCarrito = () =>
-    carrito.reduce((acc, item) => acc + item.cantidad, 0);
-
-  const eliminarProductoCarrito = (id) => {
-    setCarrito((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  const actualizarCantidad = (id, nuevaCantidad) => {
+  const actualizarCantidad = (id, nueva) =>
     setCarrito((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, cantidad: nuevaCantidad } : item
-      )
+      prev.map((i) => (i.id === id ? { ...i, cantidad: nueva } : i))
     );
-  };
 
-  const handleAñadirAlCarrito = (producto) => {
-    setProductoSeleccionado(producto);
-    setCantidad(1);
-    setShowModal(true);
-  };
+  const totalItems = carrito.reduce((a, i) => a + i.cantidad, 0);
 
-  const handleIrAlPanelUsuario = () => navigate("/panel-usuario");
-
+  /* -------------- UI ------------------ */
   return (
     <>
+      {/* ---------- Header ---------- */}
       <header className="header">
         <div className="header-inner">
           <img
             src="/img/logo/logo.PNG"
             alt="Logo"
             className="logo"
-            onClick={() => navigate("/")}
             style={{ cursor: "pointer" }}
+            onClick={() => navigate("/")}
           />
+
           <input
             type="text"
             className="search-bar"
@@ -143,64 +138,81 @@ const Carrito = () => {
             value={searchTerm}
             onChange={handleSearchChange}
           />
+
           <div className="user-actions">
             <FontAwesomeIcon
               icon={faShoppingCart}
               className="icono-carrito"
               onClick={() => setShowCarritoModal(true)}
             />
-            <span className="carrito-counter">{contarProductosCarrito()}</span>
+            <span className="carrito-counter">{totalItems}</span>
+
             <img
               src={
                 usuario?.profile_image
-                  ? `http://localhost:8000/${usuario.profile_image}`
+                  ? getImagenUrl(usuario.profile_image)
                   : "/img/usuario/principal.png"
               }
               alt="Perfil"
               className="icono-usuario"
-              onClick={handleIrAlPanelUsuario}
-              onError={(e) => {
-                e.target.src = "/img/usuario/principal.png";
-              }}
               title="Ir a tu panel"
+              onClick={() => navigate("/panel-usuario")}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = "/img/usuario/principal.png";
+              }}
             />
+
             <button className="btn btn-danger btn-sm" onClick={handleCerrarSesion}>
               Cerrar sesión
             </button>
           </div>
         </div>
+
+        {/* ---------- Categorías ---------- */}
         <nav className="categorias-menu">
           <div className="categorias-container">
-            {categorias.map((cat) => (
+            {categorias.map((c) => (
               <span
-                key={cat.id}
-                className={`categoria ${categoriaSeleccionada === cat.nombre ? "selected" : ""}`}
-                onClick={() => handleCategoriaClick(cat.nombre)}
+                key={c.id}
+                className={`categoria ${
+                  categoriaSeleccionada === c.nombre ? "selected" : ""
+                }`}
+                onClick={() => handleCategoriaClick(c.nombre)}
               >
-                {cat.nombre}
+                {c.nombre}
               </span>
             ))}
           </div>
         </nav>
       </header>
 
+      {/* ---------- Grid productos ---------- */}
       <main className="productos-container">
         <div className="productos-lista">
-          {productosFiltrados.length > 0 ? (
-            productosFiltrados.map((producto) => (
-              <div key={producto.id} className="producto-card">
+          {productosFiltrados.length ? (
+            productosFiltrados.map((p) => (
+              <div key={p.id} className="producto-card">
                 <img
-                  src={`/${producto.img}`}
+                  src={getImagenUrl(p.img)}
                   className="card-img-top"
-                  alt={producto.nombre}
+                  alt={p.nombre}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = "/img/no-image.png";
+                  }}
                 />
                 <div className="card-body">
-                  <h5 className="card-title">{producto.nombre}</h5>
-                  <p className="card-text">{producto.descripcion}</p>
-                  <h6 className="card-price">{producto.precio}€</h6>
+                  <h5 className="card-title">{p.nombre}</h5>
+                  <p className="card-text">{p.descripcion}</p>
+                  <h6 className="card-price">{p.precio}€</h6>
                   <button
                     className="btn btn-success w-100"
-                    onClick={() => handleAñadirAlCarrito(producto)}
+                    onClick={() => {
+                      setProductoSeleccionado(p);
+                      setCantidad(1);
+                      setShowModal(true);
+                    }}
                   >
                     Añadir al carrito
                   </button>
@@ -213,41 +225,62 @@ const Carrito = () => {
         </div>
       </main>
 
+      {/* ---------- Modal cantidad ---------- */}
       {showModal && (
         <div className="modal fade show" style={{ display: "block" }}>
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Selecciona la cantidad</h5>
-                <button type="button" className="btn-close" onClick={() => setShowModal(false)} />
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowModal(false)}
+                />
               </div>
               <div className="modal-body text-center">
                 <img
-                  src={`/${productoSeleccionado.img}`}
+                  src={getImagenUrl(productoSeleccionado.img)}
                   alt={productoSeleccionado.nombre}
                   className="img-fluid"
-                  style={{ width: "100px", height: "100px", objectFit: "cover" }}
+                  style={{ width: 100, height: 100, objectFit: "cover" }}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = "/img/no-image.png";
+                  }}
                 />
                 <div className="d-flex justify-content-center align-items-center mt-3">
-                  <button className="btn btn-secondary" onClick={disminuirCantidad}>-</button>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => setCantidad((c) => Math.max(1, c - 1))}
+                  >
+                    -
+                  </button>
                   <input
                     type="number"
                     value={cantidad}
-                    onChange={handleCantidadChange}
-                    min="1"
-                    max="5"
-                    className="form-control mx-2"
-                    style={{ width: "60px", textAlign: "center" }}
+                    min={1}
+                    max={5}
                     readOnly
+                    className="form-control mx-2 text-center"
+                    style={{ width: 60 }}
                   />
-                  <button className="btn btn-success" onClick={aumentarCantidad}>+</button>
+                  <button
+                    className="btn btn-success"
+                    onClick={() => setCantidad((c) => Math.min(5, c + 1))}
+                  >
+                    +
+                  </button>
                 </div>
               </div>
               <div className="modal-footer">
                 <button className="btn btn-primary" onClick={agregarAlCarrito}>
                   Agregar al carrito
                 </button>
-                <button className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setShowModal(false)}
+                >
                   Cerrar
                 </button>
               </div>
@@ -256,6 +289,7 @@ const Carrito = () => {
         </div>
       )}
 
+      {/* ---------- Modal carrito ---------- */}
       {showCarritoModal && (
         <ModalCarrito
           carrito={carrito}
