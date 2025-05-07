@@ -7,20 +7,31 @@ import ModalCarrito from "./ModalCarrito";
 import "./Carrito.css";
 
 /* ------------ CONFIGURA TU BACKEND ------------- */
-const BACKEND = "http://localhost:8000"; // cámbialo si tu API vive en otro host/puerto
+const BACKEND = "http://localhost:8000";   // ajústalo si cambias de host/puerto
 
-/* ---- Convierte la ruta almacenada en BD a una URL válida ---- */
 const getImagenUrl = (ruta) => {
-  if (!ruta) return "/img/no-image.png";
-  if (/^https?:\/\//i.test(ruta)) return ruta; // ya es absoluta
+  /* 1️⃣  Si no existe o no es string → imagen por defecto */
+  if (typeof ruta !== "string" || ruta.trim() === "") {
+    return "/img/no-image.png";
+  }
 
+  /* 2️⃣  Ya es URL absoluta (http o https) */
+  if (/^https?:\/\//i.test(ruta)) {
+    return ruta;
+  }
+
+  /* 3️⃣  Limpiar posible slash inicial */
   const clean = ruta.startsWith("/") ? ruta.slice(1) : ruta;
-  // todo lo que venga de "uploads/**" lo sirve Laravel
-  if (clean.startsWith("uploads")) return `${BACKEND}/${encodeURI(clean)}`;
 
-  // el resto (img/**) lo sirve React (public/)
+  /* 4️⃣  Rutas que salen de Laravel ⇒ public/uploads */
+  if (clean.startsWith("uploads")) {
+    return `${BACKEND}/${encodeURI(clean)}`;
+  }
+
+  /* 5️⃣  Cualquier otra cosa (asset dentro de React) */
   return `/${encodeURI(clean)}`;
 };
+
 
 const Carrito = () => {
   const navigate = useNavigate();

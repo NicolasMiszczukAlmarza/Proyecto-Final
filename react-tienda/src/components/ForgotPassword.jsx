@@ -50,7 +50,21 @@ const ForgotPassword = () => {
     <div className="container-fluid vh-100 d-flex align-items-center justify-content-center bg-light">
       <div className="row w-75 shadow-lg p-4 bg-white rounded">
         <div className="col-md-6 d-flex align-items-center justify-content-center">
-          <img src="/img/logo/logo.JPG" alt="Logo" className="img-fluid rounded shadow" style={{ maxWidth: '80%' }} />
+        <img
+    src="/img/logo/logo.PNG"
+    alt="Logo"
+    className="img-fluid rounded shadow"
+    style={{
+      maxWidth: '90%',
+      maxHeight: '300px',
+      objectFit: 'contain',
+      cursor: 'pointer'
+    }}
+    onClick={() => navigate("/")}
+    onError={(e) => {
+      e.target.src = "/img/logo/nico.PNG";
+    }}
+  />
         </div>
         <div className="col-md-6">
           <div className="col-12 text-center mb-4">
