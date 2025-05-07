@@ -26,8 +26,7 @@ class VerifyCsrfToken extends Middleware
         'editar-producto/*',
         'productos',
         'eliminar-producto/*',
-        'eliminar-usuario', // ← ✅ AÑADIR ESTA LÍNEA
+        'eliminar-usuario',
+        'user/update', 
     ];
-    
-    
 }
