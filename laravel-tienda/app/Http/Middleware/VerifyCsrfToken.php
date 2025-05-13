@@ -28,5 +28,6 @@ class VerifyCsrfToken extends Middleware
         'eliminar-producto/*',
         'eliminar-usuario',
         'user/update', 
+        'user/actualizar',
     ];
 }
