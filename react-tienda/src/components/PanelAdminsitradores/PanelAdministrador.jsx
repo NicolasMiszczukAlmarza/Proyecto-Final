@@ -29,6 +29,36 @@ const PanelAdministrador = () => {
   const [finanzasData, setFinanzasData] = useState(null);
   const [recargarProductos, setRecargarProductos] = useState(false);
 
+  /* ------------------- HOOKS ------------------- */
+
+// 1️⃣ Fuerza recarga al entrar a “Editar producto”
+useEffect(() => {
+  if (seleccion === 'Editar producto') {
+    setRecargarProductos(prev => !prev);
+  }
+}, [seleccion]);
+
+// 2️⃣ Obtiene usuarios / productos cada vez que cambian la pestaña
+//     o recargarProductos pasa a true
+useEffect(() => {
+  if (['Convertir a Admin', 'Convertir a Normal', 'Eliminar usuarios'].includes(seleccion)) {
+    fetch('http://localhost:8000/usuarios', { credentials: 'include' })
+      .then(r => r.json()).then(setUsuarios)
+      .catch(() => setUsuarios([]));
+  }
+
+  if (['Editar producto', 'Renovar Stock'].includes(seleccion) || recargarProductos) {
+    fetch('http://localhost:8000/productos', { credentials: 'include' })
+      .then(r => r.json()).then(setProductos)
+      .catch(() => setProductos([]));
+  }
+}
+
+, [seleccion, recargarProductos]);
+
+
+
+
   /* --- Eliminar usuario ---------------------------------------- */
   const [userToDelete, setUserToDelete] = useState(null);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
@@ -49,18 +79,7 @@ const PanelAdministrador = () => {
     setUsuario(u);
   }, []);
 
-  // Usuarios / productos según pestaña
-  useEffect(() => {
-    if (['Convertir a Admin', 'Convertir a Normal', 'Eliminar usuarios'].includes(seleccion)) {
-      fetch('http://localhost:8000/usuarios', { credentials: 'include' })
-        .then(r => r.json()).then(setUsuarios).catch(() => setUsuarios([]));
-    }
 
-    if (['Editar producto', 'Renovar Stock'].includes(seleccion) || recargarProductos) {
-      fetch('http://localhost:8000/productos', { credentials: 'include' })
-        .then(r => r.json()).then(setProductos).catch(() => setProductos([]));
-    }
-  }, [seleccion, recargarProductos]);
 
   // Categorías (una sola vez)
   useEffect(() => {
@@ -96,8 +115,10 @@ const PanelAdministrador = () => {
   /* ----------------------- USERS --------------------------------- */
   const toggleRol = async (email, rolActual) => {
     const endpoint = rolActual === 'admin' ? 'quitar-admin' : 'convertir-admin';
-    await fetch(`http://localhost:8000/${endpoint}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+    await fetch(`http://localhost:8000/admin/${endpoint}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ email }),
     });
     setUsuarios(us => us.map(u => u.email === email
@@ -105,20 +126,25 @@ const PanelAdministrador = () => {
       : u));
     showMsg('Rol actualizado');
   };
-
+  
   const confirmDeleteUser = (u) => { setUserToDelete(u); setDeleteModalVisible(true); };
 
   const handleDeleteUser = async () => {
     if (!userToDelete) return;
     try {
       await fetch('http://localhost:8000/sanctum/csrf-cookie', { credentials: 'include' });
-      const resp = await fetch('http://localhost:8000/eliminar-usuario', {
-        method: 'DELETE', credentials: 'include',
-        headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': csrfToken() },
+      const resp = await fetch('http://localhost:8000/admin/eliminar', {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-XSRF-TOKEN': csrfToken(),
+        },
         body: JSON.stringify({ email: userToDelete.email }),
       });
+  
       if (!resp.ok) throw new Error((await resp.json()).message);
-
+  
       if (userToDelete.email === usuario.email) {
         localStorage.removeItem('usuario');
         navigate('/login');
@@ -126,20 +152,20 @@ const PanelAdministrador = () => {
         setUsuarios(prev => prev.filter(u => u.email !== userToDelete.email));
         showMsg('Usuario eliminado');
       }
-    }catch (err) {
+    } catch (err) {
       if (err instanceof Response) {
         const errorData = await err.json();
         console.error("Errores de validación:", errorData.errors);
         showMsg(Object.values(errorData.errors).flat().join(', '), 'danger');
       } else {
-        showMsg(err.message || 'Error al editar', 'danger');
+        showMsg(err.message || 'Error al eliminar', 'danger');
       }
-    }
-     finally {
+    } finally {
       setDeleteModalVisible(false);
       setUserToDelete(null);
     }
   };
+  
 
   /* ----------------------- PRODUCTS ------------------------------ */
   const handleProductoChange = (e, setFunc) => {
@@ -149,7 +175,14 @@ const PanelAdministrador = () => {
 
   const handleAgregarProducto = async () => {
     const formData = new FormData();
-    Object.entries(nuevoProducto).forEach(([k, v]) => formData.append(k, v));
+    Object.entries(nuevoProducto).forEach(([k, v]) => {
+      if (k === 'img') {
+        if (v instanceof File) formData.append('img', v);
+        return;
+      }
+      formData.append(k, v);
+    });
+    
 
     try {
       await fetch('http://localhost:8000/sanctum/csrf-cookie', { credentials: 'include' });
@@ -168,35 +201,47 @@ const PanelAdministrador = () => {
   const handleEditarProducto = async () => {
     if (!productoEditando) return;
   
-    const formData = new FormData();
-    Object.entries(productoEditando).forEach(([k, v]) => formData.append(k, v));
-  
     try {
+      // Preparar datos para el formulario
+      const formData = new FormData();
+      Object.entries(productoEditando).forEach(([key, value]) => {
+        if (key === 'img') {
+          if (value instanceof File) formData.append('img', value);
+        } else {
+          formData.append(key, value);
+        }
+      });
+  
+      // Obtener el token CSRF
       await fetch('http://localhost:8000/sanctum/csrf-cookie', { credentials: 'include' });
   
+      // Hacer la petición para actualizar el producto
       const resp = await fetch(`http://localhost:8000/editar-producto/${productoEditando.id}`, {
         method: 'POST',
         credentials: 'include',
         headers: {
           'X-XSRF-TOKEN': csrfToken(),
-          'Accept': 'application/json' // ✅ Muy importante
+          'Accept': 'application/json',
         },
         body: formData,
       });
-      
   
-      if (!resp.ok) throw new Error((await resp.json()).message);
+      const data = await resp.json();
+  
+      if (!resp.ok) {
+        console.error('Errores del backend:', data.errors || data.message);
+        showMsg(data.message || 'Error al editar', 'danger');
+        return;
+      }
   
       showMsg('Producto actualizado');
       setRecargarProductos(prev => !prev);
-  
-      // ✅ Aquí cerramos el modal tras éxito
       setProductoEditando(null);
     } catch (err) {
+      console.error('Error general:', err);
       showMsg(err.message || 'Error al editar', 'danger');
     }
   };
-  
   
 
   const confirmarEliminarProducto = (p) => { setProductoEliminar(p); setDeleteProductoVisible(true); };
@@ -407,8 +452,9 @@ const PanelAdministrador = () => {
   /* ----------- EDITAR / ELIMINAR CON FILTRO POR CATEGORÍA ---------- */
   const renderEditarProductos = () => {
     const filtrados = categoriaFiltro
-      ? productos.filter(p => p.id_categoria === Number(categoriaFiltro))
-      : productos;
+  ? productos.filter(p => String(p.id_categoria) === categoriaFiltro)
+  : productos;
+
 
     return (
       <div className="container mt-4">

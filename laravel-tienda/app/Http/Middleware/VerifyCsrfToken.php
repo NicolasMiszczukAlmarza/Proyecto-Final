@@ -20,14 +20,17 @@ class VerifyCsrfToken extends Middleware
         'actualizar-usuario',
         'forgot-password',
         'reset-password',
-        'convertir-admin',
-        'quitar-admin',
         'agregar-producto',
         'editar-producto/*',
-        'productos',
         'eliminar-producto/*',
-        'eliminar-usuario',
-        'user/update', 
+        'productos',
+        'renovar-stock',              // 👈 Añade esta si no está
+        'user/update',
         'user/actualizar',
+        'admin/convertir-admin',
+        'admin/quitar-admin',
+        'admin/eliminar',
     ];
+    
+    
 }
