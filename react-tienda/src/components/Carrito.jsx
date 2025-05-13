@@ -6,32 +6,21 @@ import { categorias } from "../data/categorias";
 import ModalCarrito from "./ModalCarrito";
 import "./Carrito.css";
 
-/* ------------ CONFIGURA TU BACKEND ------------- */
-const BACKEND = "http://localhost:8000";   // ajústalo si cambias de host/puerto
+const BACKEND = "http://localhost:8000";
 
 const getImagenUrl = (ruta) => {
-  /* 1️⃣  Si no existe o no es string → imagen por defecto */
   if (typeof ruta !== "string" || ruta.trim() === "") {
     return "/img/no-image.png";
   }
-
-  /* 2️⃣  Ya es URL absoluta (http o https) */
   if (/^https?:\/\//i.test(ruta)) {
     return ruta;
   }
-
-  /* 3️⃣  Limpiar posible slash inicial */
   const clean = ruta.startsWith("/") ? ruta.slice(1) : ruta;
-
-  /* 4️⃣  Rutas que salen de Laravel ⇒ public/uploads */
   if (clean.startsWith("uploads")) {
     return `${BACKEND}/${encodeURI(clean)}`;
   }
-
-  /* 5️⃣  Cualquier otra cosa (asset dentro de React) */
   return `/${encodeURI(clean)}`;
 };
-
 
 const Carrito = () => {
   const navigate = useNavigate();
@@ -47,7 +36,6 @@ const Carrito = () => {
 
   const usuario = JSON.parse(localStorage.getItem("usuario"));
 
-  /* ---------------- EFECTOS ----------------- */
   useEffect(() => {
     if (!usuario) navigate("/login");
   }, [usuario, navigate]);
@@ -59,7 +47,6 @@ const Carrito = () => {
       .catch(() => setProductos([]));
   }, []);
 
-  /* -------------- HANDLERS ------------------ */
   const handleCerrarSesion = async () => {
     try {
       const r = await fetch(`${BACKEND}/logout`, {
@@ -86,7 +73,6 @@ const Carrito = () => {
     setCategoriaSeleccionada(null);
   };
 
-  /* ----------- FILTRADO ------------------ */
   const productosFiltrados = useMemo(() => {
     return productos.filter((p) => {
       const cat = categorias.find((c) => c.id === p.id_categoria);
@@ -100,7 +86,6 @@ const Carrito = () => {
     });
   }, [productos, categoriaSeleccionada, searchTerm]);
 
-  /* ----------- CARRITO ------------------ */
   const agregarAlCarrito = () => {
     setCarrito((prev) => {
       const ex = prev.find((i) => i.id === productoSeleccionado.id);
@@ -128,29 +113,31 @@ const Carrito = () => {
 
   const totalItems = carrito.reduce((a, i) => a + i.cantidad, 0);
 
-  /* -------------- UI ------------------ */
   return (
     <>
-      {/* ---------- Header ---------- */}
       <header className="header">
         <div className="header-inner">
-          <img
-            src="/img/logo/logo.PNG"
-            alt="Logo"
-            className="logo"
-            style={{ cursor: "pointer" }}
-            onClick={() => navigate("/")}
-          />
+          <div className="header-left">
+            <img
+              src="public/img/logo/logo.png"
+              alt="Logo"
+              className="logo"
+              style={{ cursor: "pointer" }}
+              onClick={() => navigate("/")}
+            />
+          </div>
 
-          <input
-            type="text"
-            className="search-bar"
-            placeholder="Buscar productos..."
-            value={searchTerm}
-            onChange={handleSearchChange}
-          />
+          <div className="header-center">
+            <input
+              type="text"
+              className="search-bar"
+              placeholder="Buscar productos..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
+          </div>
 
-          <div className="user-actions">
+          <div className="header-right user-actions">
             <FontAwesomeIcon
               icon={faShoppingCart}
               className="icono-carrito"
@@ -174,13 +161,19 @@ const Carrito = () => {
               }}
             />
 
-            <button className="btn btn-danger btn-sm" onClick={handleCerrarSesion}>
-              Cerrar sesión
-            </button>
+<button
+  className="btn btn-danger btn-sm btn-cerrar-sesion"
+  onClick={handleCerrarSesion}
+>
+  Cerrar sesión
+</button>
+
+
+
+
           </div>
         </div>
 
-        {/* ---------- Categorías ---------- */}
         <nav className="categorias-menu">
           <div className="categorias-container">
             {categorias.map((c) => (
@@ -198,7 +191,6 @@ const Carrito = () => {
         </nav>
       </header>
 
-      {/* ---------- Grid productos ---------- */}
       <main className="productos-container">
         <div className="productos-lista">
           {productosFiltrados.length ? (
@@ -236,12 +228,11 @@ const Carrito = () => {
         </div>
       </main>
 
-      {/* ---------- Modal cantidad ---------- */}
       {showModal && (
         <div className="modal fade show" style={{ display: "block" }}>
           <div className="modal-dialog">
             <div className="modal-content">
-              <div className="modal-header">
+              <div className="modal-header justify-content-center">
                 <h5 className="modal-title">Selecciona la cantidad</h5>
                 <button
                   type="button"
@@ -253,19 +244,20 @@ const Carrito = () => {
                 <img
                   src={getImagenUrl(productoSeleccionado.img)}
                   alt={productoSeleccionado.nombre}
-                  className="img-fluid"
+                  className="img-fluid rounded border"
                   style={{ width: 100, height: 100, objectFit: "cover" }}
                   onError={(e) => {
                     e.currentTarget.onerror = null;
                     e.currentTarget.src = "/img/no-image.png";
                   }}
                 />
-                <div className="d-flex justify-content-center align-items-center mt-3">
+                <div className="quantity-controls d-flex justify-content-center align-items-center mt-3 gap-3">
                   <button
-                    className="btn btn-secondary"
+                    className="btn btn-secondary rounded-circle"
+                    style={{ width: 45, height: 45 }}
                     onClick={() => setCantidad((c) => Math.max(1, c - 1))}
                   >
-                    -
+                    −
                   </button>
                   <input
                     type="number"
@@ -273,11 +265,12 @@ const Carrito = () => {
                     min={1}
                     max={5}
                     readOnly
-                    className="form-control mx-2 text-center"
-                    style={{ width: 60 }}
+                    className="form-control text-center fw-bold"
+                    style={{ width: 60, fontSize: "1.1rem" }}
                   />
                   <button
-                    className="btn btn-success"
+                    className="btn btn-success rounded-circle"
+                    style={{ width: 45, height: 45 }}
                     onClick={() => setCantidad((c) => Math.min(5, c + 1))}
                   >
                     +
@@ -285,11 +278,11 @@ const Carrito = () => {
                 </div>
               </div>
               <div className="modal-footer">
-                <button className="btn btn-primary" onClick={agregarAlCarrito}>
+                <button className="btn btn-primary w-100" onClick={agregarAlCarrito}>
                   Agregar al carrito
                 </button>
                 <button
-                  className="btn btn-secondary"
+                  className="btn btn-outline-secondary w-100 mt-2"
                   onClick={() => setShowModal(false)}
                 >
                   Cerrar
@@ -300,7 +293,6 @@ const Carrito = () => {
         </div>
       )}
 
-      {/* ---------- Modal carrito ---------- */}
       {showCarritoModal && (
         <ModalCarrito
           carrito={carrito}

@@ -1,156 +1,300 @@
+/* Base global */
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #fff;
-    scroll-behavior: smooth;
-  }
-  
-  .header {
-    background: #fff;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    position: fixed;
-    top: 0;
-    width: 100%;
-    z-index: 1000;
-    padding: 10px 20px;
-  }
-  
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #fdfdfd;
+  color: #333;
+  scroll-behavior: smooth;
+}
+
+/* Header fijo */
+.header {
+  background: #ffffff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  padding: 12px 24px;
+}
+
+/* Alineación dentro de la cabecera */
+.header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.header-left {
+  flex: 1;
+  justify-content: flex-start;
+}
+
+.header-center {
+  flex: 2;
+  display: flex;
+  justify-content: center;
+}
+
+.header-right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Logo */
+.logo {
+  height: 50px;
+  cursor: pointer;
+}
+
+/* Barra de búsqueda */
+.search-bar {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px 15px;
+  border-radius: 30px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+/* Usuario y carrito */
+.user-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icono-carrito {
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: #333;
+}
+
+.icono-usuario {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ccc;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.icono-usuario:hover {
+  border-color: #007bff;
+}
+
+.carrito-counter {
+  font-weight: bold;
+  color: #007bff;
+  margin-left: -8px;
+  margin-top: -8px;
+  background: #fff;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+}
+
+/* Botón de Cerrar sesión */
+.btn-cerrar-sesion {
+  width: auto; /* Elimina el ancho completo */
+  padding: 6px 12px; /* Reduce el espacio alrededor del texto */
+  font-size: 0.875rem; /* Fuente más pequeña */
+  border-radius: 25px; /* Más circular */
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 35px; /* Ajusta la altura */
+  min-width: 35px; /* Tamaño mínimo ajustado */
+  white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+  background-color: #dc3545; /* Fondo rojo */
+  color: white; /* Texto blanco */
+  border: none; /* Elimina el borde */
+  transition: all 0.3s ease; /* Transición suave para efectos */
+}
+
+/* Efecto al pasar el mouse sobre el botón */
+.btn-cerrar-sesion:hover {
+  background-color: #c82333; /* Rojo más oscuro al pasar el mouse */
+  cursor: pointer; /* Cambio de cursor */
+  transform: scale(1.05); /* Efecto de agrandamiento */
+}
+
+/* Efecto de foco para accesibilidad */
+.btn-cerrar-sesion:focus {
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+}
+
+/* Categorías */
+.categorias-menu {
+  background: #f1f3f5;
+  padding: 10px 0;
+  margin-top: 70px;
+  border-top: 1px solid #ddd;
+}
+
+.categorias-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
+.categoria {
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 20px;
+  transition: all 0.2s;
+  color: #444;
+}
+
+.categoria:hover,
+.categoria.selected {
+  background-color: #a8ccf3;
+  color: white;
+}
+
+/* Productos */
+.productos-container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 130px 20px 50px;
+}
+
+.productos-lista {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24px;
+}
+
+.producto-card {
+  width: 280px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease;
+  overflow: hidden;
+}
+
+.producto-card:hover {
+  transform: scale(1.03);
+}
+
+.card-img-top {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.card-body {
+  padding: 16px;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.card-text {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.card-price {
+  font-weight: bold;
+  font-size: 1rem;
+  color: #007bff;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
   .header-inner {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 15px;
+    flex-direction: column;
+    align-items: stretch;
   }
-  
-  .logo {
-    height: 60px;
+
+  .header-left,
+  .header-center,
+  .header-right {
+    justify-content: center;
+    flex: unset;
   }
-  
+
   .search-bar {
-    max-width: 400px;
     width: 100%;
-    padding: 8px 12px;
-    border-radius: 25px;
-    border: 1px solid #ccc;
+    margin: 10px 0;
   }
-  
-  .user-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  
-  .icono-carrito {
-    font-size: 1.5rem;
-    cursor: pointer;
-  }
-  
-  .icono-usuario {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #ddd;
-    cursor: pointer;
-  }
-  
-  .carrito-counter {
-    font-weight: bold;
-    color: #007bff;
-  }
-  
-  .categorias-menu {
-    background: #f8f9fa;
-    padding: 10px 0;
-    margin-top: 10px;
-  }
-  
-  .categorias-container {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-  }
-  
-  .categoria {
-    font-weight: bold;
-    cursor: pointer;
-    transition: color 0.3s;
-  }
-  
-  .categoria.selected {
-    color: #007bff;
-  }
-  
-  .productos-container {
-    max-width: 1200px;
-    margin: auto;
-    padding: 160px 20px 50px;
-  }
-  
+
   .productos-lista {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
+    flex-direction: column;
+    align-items: center;
   }
-  
+
   .producto-card {
-    width: 280px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease;
+    width: 90%;
   }
-  
-  .producto-card:hover {
-    transform: scale(1.05);
-  }
-  
-  .card-img-top {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 8px 8px 0 0;
-  }
-  
-  .card-body {
-    padding: 15px;
-  }
-  
-  .card-title {
-    font-size: 1.1rem;
-    margin-bottom: 5px;
-  }
-  
-  .card-text {
-    font-size: 0.9rem;
-    margin-bottom: 10px;
-  }
-  
-  .card-price {
-    font-weight: bold;
-    color: #007bff;
-  }
-  
-  @media (max-width: 768px) {
-    .header-inner {
-      flex-direction: column;
-      align-items: stretch;
-    }
-  
-    .search-bar {
-      max-width: 100%;
-      margin: 10px 0;
-    }
-  
-    .productos-lista {
-      flex-direction: column;
-      align-items: center;
-    }
-  
-    .producto-card {
-      width: 90%;
-    }
-  }
-  
+}
+
+/* ---------- CABECERA ---------- */
+.header-inner{
+  display:flex;
+  align-items:center;      /* centra verticalmente */
+  gap:15px;
+}
+
+/* Columna logo */
+.header-left{
+  flex:0 0 auto;           /* solo el ancho del logo */
+}
+
+/* Columna buscador */
+.header-center{
+  flex:1 1 auto;           /* ocupa todo el espacio libre */
+  display:flex;
+  justify-content:center;  /* centra el input */
+}
+
+/* Columna acciones */
+.header-right{
+  flex:0 0 auto;           /* solo lo necesario */
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+/* ---------- BOTÓN CERRAR SESIÓN ---------- */
+.btn-cerrar-sesion{
+  padding:4px 10px;        /* menos padding => más estrecho   */
+  font-size:0.8rem;
+  border-radius:18px;      /* píldora más compacta */
+  height:32px;
+  min-width:90px;          /* lo justo para el texto */
+  width:auto;
+  background:#dc3545;
+  color:#fff;
+  border:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  white-space:nowrap;
+  transition:background .25s, transform .25s;
+}
+.btn-cerrar-sesion:hover{
+  background:#c82333;
+  transform:scale(1.05);
+}
+.btn-cerrar-sesion:focus{
+  outline:none;
+  box-shadow:0 0 5px rgba(0,0,0,.2);
+}

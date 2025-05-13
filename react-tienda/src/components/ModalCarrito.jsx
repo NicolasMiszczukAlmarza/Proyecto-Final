@@ -3,10 +3,8 @@ import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import "./ModalCarrito.css";
 
-/* ------------ Backend base ------------- */
 const BACKEND = "http://localhost:8000";
 
-/* ---- Convierte la ruta almacenada en BD a una URL válida ---- */
 const getImagenUrl = (ruta) => {
   if (!ruta) return "/img/no-image.png";
   if (/^https?:\/\//i.test(ruta)) return ruta;
@@ -17,21 +15,14 @@ const getImagenUrl = (ruta) => {
     : `/${encodeURI(clean)}`;
 };
 
-const ModalCarrito = ({
-  carrito,
-  onCerrar,
-  onEliminarProducto,
-  onActualizarCantidad,
-}) => {
+const ModalCarrito = ({ carrito, onCerrar, onEliminarProducto, onActualizarCantidad }) => {
   const navigate = useNavigate();
-
   const [cantidad, setCantidad] = useState({});
   const [totalConIva, setTotalConIva] = useState(0);
   const [descuentoAplicado, setDescuentoAplicado] = useState(0);
   const [totalFinal, setTotalFinal] = useState(0);
   const [mensajeDescuento, setMensajeDescuento] = useState("");
 
-  /* ---------------- CÁLCULOS DE TOTAL ---------------- */
   useEffect(() => {
     const base = carrito.reduce(
       (t, p) => t + p.precio * (cantidad[p.id] || p.cantidad),
@@ -54,27 +45,27 @@ const ModalCarrito = ({
     setTotalConIva(conIva);
   }, [carrito, cantidad]);
 
+  const actualizarCantidad = (id, delta) => {
+    const nueva = Math.min(5, Math.max(1, (cantidad[id] || 1) + delta));
+    setCantidad((prev) => ({ ...prev, [id]: nueva }));
+    onActualizarCantidad(id, nueva);
+  };
+
   const realizarPedido = () =>
     navigate("/pago", { state: { totalFinal, carrito, descuentoAplicado } });
 
-  /* ------------------- UI ------------------- */
   return (
-    <div
-      className="modal fade show"
-      style={{ display: "block", position: "fixed", top: 0, right: 0, zIndex: 1050 }}
-    >
+    <div className="modal fade show" style={{ display: "block", position: "fixed", top: 0, right: 0, zIndex: 1050 }}>
       <div className="modal-dialog modal-lg">
         <div className="modal-content">
           <div className="modal-header">
-            <h5 className="modal-title text-center">Tu Carrito</h5>
+            <h5 className="modal-title">Tu Carrito</h5>
             <button type="button" className="btn-close" onClick={onCerrar}></button>
           </div>
 
           <div className="modal-body">
             {mensajeDescuento && (
-              <div className="alert alert-info text-center mb-3">
-                {mensajeDescuento}
-              </div>
+              <div className="alert alert-info text-center mb-3">{mensajeDescuento}</div>
             )}
 
             {carrito.length === 0 ? (
@@ -82,68 +73,58 @@ const ModalCarrito = ({
             ) : (
               <>
                 {carrito.map((p) => (
-                  <div
-                    key={p.id}
-                    className="d-flex align-items-center mb-3 border-bottom pb-2"
-                  >
+                  <div key={p.id} className="carrito-producto">
                     <img
                       src={getImagenUrl(p.img)}
                       alt={p.nombre}
                       className="img-thumbnail"
-                      style={{ width: 80, height: 80, objectFit: "cover" }}
                       onError={(e) => {
                         e.currentTarget.onerror = null;
                         e.currentTarget.src = "/img/no-image.png";
                       }}
                     />
-                    <div className="ms-3 flex-grow-1">
-                      <h6>{p.nombre}</h6>
-                      <p className="mb-1">{p.precio.toFixed(2)} €</p>
-
-                      <input
-                        type="number"
-                        min="1"
-                        max="5"
-                        value={cantidad[p.id] || p.cantidad}
-                        onChange={(e) => {
-                          const nueva = Math.min(5, Math.max(1, +e.target.value));
-                          setCantidad((prev) => ({ ...prev, [p.id]: nueva }));
-                          onActualizarCantidad(p.id, nueva);
-                        }}
-                        className="form-control w-50"
-                      />
+                    <div className="producto-info">
+                      <h6 className="producto-nombre">{p.nombre}</h6>
+                      <p>{p.precio.toFixed(2)} €</p>
+                      <div className="d-flex align-items-center gap-2">
+                        <button className="btn-decrement" onClick={() => actualizarCantidad(p.id, -1)}>-</button>
+                        <input
+                          type="text"
+                          readOnly
+                          value={cantidad[p.id] || p.cantidad}
+                          className="form-control text-center cantidad-input"
+                        />
+                        <button className="btn-increment" onClick={() => actualizarCantidad(p.id, 1)}>+</button>
+                      </div>
                     </div>
-                    <button
-                      className="btn btn-danger"
-                      onClick={() => onEliminarProducto(p.id)}
-                    >
+                    <button className="btn btn-eliminar" onClick={() => onEliminarProducto(p.id)}>
                       Eliminar
                     </button>
                   </div>
                 ))}
 
-                <div className="mt-3 d-flex justify-content-between">
-                  <h6>Total con IVA:</h6>
-                  <h6>{totalConIva.toFixed(2)} €</h6>
-                </div>
-
-                {descuentoAplicado > 0 && (
-                  <div className="mt-3 d-flex justify-content-between text-success">
-                    <h6>Descuento aplicado:</h6>
-                    <h6>-{descuentoAplicado.toFixed(2)} €</h6>
+                <div className="resumen-precio">
+                  <div className="d-flex justify-content-between">
+                    <span>Total con IVA:</span>
+                    <span>{totalConIva.toFixed(2)} €</span>
                   </div>
-                )}
-
-                <div className="mt-3 d-flex justify-content-between">
-                  <h6>Precio final:</h6>
-                  <h6>{totalFinal.toFixed(2)} €</h6>
+                  {descuentoAplicado > 0 && (
+                    <div className="d-flex justify-content-between text-success">
+                      <span>Descuento aplicado:</span>
+                      <span>-{descuentoAplicado.toFixed(2)} €</span>
+                    </div>
+                  )}
+                  <div className="d-flex justify-content-between precio-final">
+                    <span>Precio final:</span>
+                    <span>{totalFinal.toFixed(2)} €</span>
+                  </div>
                 </div>
               </>
             )}
           </div>
 
           <div className="modal-footer">
-            <button className="btn btn-primary w-100 mt-2" onClick={realizarPedido}>
+            <button className="btn btn-primary w-100" onClick={realizarPedido}>
               Realizar pedido
             </button>
           </div>

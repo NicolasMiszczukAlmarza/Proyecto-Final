@@ -1,103 +1,151 @@
-/* Botón Disminuir */
-.btn-decrement {
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: red;
-    color: white;
-    border: none;
-    border-radius: 5px;
-  }
-  
-  /* Botón Aumentar */
-  .btn-increment {
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: green;
-    color: white;
-    border: none;
-    border-radius: 5px;
-  }
-  
-  /* Botón Vaciar Carrito */
-  .btn-danger.w-100 {
-    width: 100%;
-    background-color: red;
-    border-color: red;
-    padding: 12px;
-    font-size: 16px;
-    border-radius: 5px;
-  }
-  
-  /* Botón Proceder al Pago */
-  .btn-primary.w-100 {
-    width: 100%;
-    background-color: #6f42c1;
-    border-color: #6f42c1;
-    padding: 12px;
-    font-size: 16px;
-    border-radius: 5px;
-  }
-  
-  /* Asegurar que las imágenes no se deformen */
-  img {
-    max-width: 100%;
-    height: auto;
-  }
-  
-  /* Modal Footer Ajustes */
-  .modal-footer .w-100 {
-    display: flex;
-    justify-content: center;
-  }
-  
-  .modal-footer .btn {
-    width: 100%;
-  }
+/* Estilos generales del modal */
+.modal-content {
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  background-color: #ffffff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
+.modal-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-bottom: 1px solid #eaeaea;
+}
 
-/* Asegúrate de que la clase .modal-title esté centrada en su contenedor */
 .modal-title {
-    width: 100%; /* Asegura que el título ocupe todo el ancho disponible */
-    text-align: center; /* Centra el texto */
-    font-size: 2rem; /* Tamaño más grande para que sea destacable */
-    font-weight: bold; /* Texto en negrita */
-    color: #6f42c1; /* Color morado */
-    padding: 10px 0; /* Espaciado arriba y abajo */
-    margin-bottom: 20px; /* Espacio abajo del título */
-  }
-  
-  /* Si necesitas que el contenedor también tenga un estilo adicional */
-  .modal-header {
-    display: flex;
-    justify-content: center; /* Asegura que el título esté centrado horizontalmente */
-    align-items: center; /* Alinea el contenido verticalmente en el centro */
-  }
-  
-  /* Aplica negrita al nombre del producto */
-.producto-nombre {
-    font-weight: bold;
-  }
-  
+  width: 100%;
+  text-align: center;
+  font-size: 1.75rem;
+  color: #6f42c1;
+  font-weight: bold;
+  padding: 10px 0;
+}
 
-  .total-con-descuento {
-    font-weight: bold;
+.modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.modal-footer {
+  border-top: 1px solid #eaeaea;
+  padding-top: 16px;
+}
+
+/* Estilos del producto en el carrito */
+.carrito-producto {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid #eaeaea;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  transition: box-shadow 0.2s ease;
+}
+
+.carrito-producto:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.producto-info {
+  flex-grow: 1;
+}
+
+.producto-nombre {
+  font-weight: bold;
+  margin-bottom: 4px;
+  color: #333;
+}
+
+/* Botones de cantidad */
+.btn-decrement,
+.btn-increment {
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-decrement {
+  background-color: #e53935;
+}
+
+.btn-increment {
+  background-color: #43a047;
+}
+
+.cantidad-input {
+  width: 50px;
+}
+
+/* Botón eliminar */
+.btn-eliminar {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+/* Botón de realizar pedido */
+.btn-primary.w-100 {
+  width: 100%;
+  background-color: #6f42c1;
+  border-color: #6f42c1;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 5px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.btn-primary.w-100:hover {
+  background-color: #5e35b1;
+}
+
+/* Estilos de resumen */
+.resumen-precio {
+  margin-top: 24px;
+  font-size: 1rem;
+  color: #333;
+}
+
+.precio-final {
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+/* Imagenes */
+.img-thumbnail {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* Animación modal */
+.modal.fade.show {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
   }
-  
-  .btn-eliminar {
-    background-color: #dc3545;
-    border: none;
-    border-radius: 4px;
-    padding: 6px 12px;
-    font-size: 14px;
-    width: auto;
-    white-space: nowrap;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  
+}

@@ -10,7 +10,6 @@ const Pago = () => {
   const navigate = useNavigate();
   const { totalFinal, carrito, descuentoAplicado } = location.state || {};
 
-  // Leer usuario autenticado de localStorage
   let correo = null;
   try {
     const usuario = JSON.parse(localStorage.getItem('usuario'));
@@ -24,7 +23,6 @@ const Pago = () => {
   const [fechaCaducidad, setFechaCaducidad] = useState('');
   const [cvv, setCvv] = useState('');
 
-  // Redirección y protección de ruta
   useEffect(() => {
     if (!correo) {
       toast.error('No se encontró el correo del usuario. Inicie sesión nuevamente.', {
@@ -45,7 +43,6 @@ const Pago = () => {
     }
   }, [correo, carrito, totalFinal, navigate]);
 
-  // No renderiza el formulario si falta info
   if (!correo || !carrito || !totalFinal) return <ToastContainer />;
 
   const handleSubmit = async (e) => {
