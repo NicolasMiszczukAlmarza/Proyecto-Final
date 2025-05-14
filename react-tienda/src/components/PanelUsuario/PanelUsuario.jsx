@@ -20,23 +20,23 @@ const PanelUsuario = () => {
     const fetchUsuario = async () => {
       try {
         // Obtener datos actualizados del usuario
-        const response = await axios.get(`http://localhost:8000/user`, {
+        const response = await axios.get(`http://localhost:8000/usuario`, {
           withCredentials: true,
         });
-  
+
         if (response.status === 200) {
           const user = response.data;
-  
+
           // Actualizamos el estado
           setUsuario(user);
-  
+
           // Actualizamos el formulario con los nuevos datos
           setFormData({
             name: user.name,
             last_name: user.last_name,
             address: user.address || '',
           });
-  
+
           // Guardamos el usuario actualizado en localStorage
           localStorage.setItem('usuario', JSON.stringify(user));
         }
@@ -45,10 +45,10 @@ const PanelUsuario = () => {
         navigate('/login');
       }
     };
-  
+
     fetchUsuario();
   }, [navigate]);
-  
+
 
   // Cargar pedidos al seleccionar sección 'Pedidos'
   useEffect(() => {
@@ -82,12 +82,20 @@ const PanelUsuario = () => {
       const xsrfToken = decodeURIComponent(
         document.cookie.split('; ').find(c => c.startsWith('XSRF-TOKEN='))?.split('=')[1] || ''
       );
-      const resp = await fetch('http://localhost:8000/eliminar-usuario', {
+
+
+      const resp = await fetch('http://localhost:8000/usuario/eliminar', {
         method: 'DELETE',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': xsrfToken },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-XSRF-TOKEN': xsrfToken,
+        },
         body: JSON.stringify({ email: usuario.email })
       });
+
+
+
       setShowConfirm(false);
       if (resp.ok) {
         setMensaje({ texto: '✅ Cuenta eliminada correctamente.', tipo: 'success' });
@@ -107,60 +115,57 @@ const PanelUsuario = () => {
   // Actualizar perfil
   const handleActualizar = async () => {
     if (!usuario) return;
-  
+
     try {
-      // Pedimos el token CSRF para la sesión
-      await axios.get('http://localhost:8000/sanctum/csrf-cookie', {
-        withCredentials: true
-      });
-  
-      // Creamos el formData con los datos
+      // 1. Pedir la cookie de sesión + CSRF
+      await axios.get('http://localhost:8000/sanctum/csrf-cookie', { withCredentials: true });
+
+      // 2. Obtener el token del XSRF-TOKEN cookie
+      const csrfToken = decodeURIComponent(
+        document.cookie
+          .split('; ')
+          .find(row => row.startsWith('XSRF-TOKEN='))
+          ?.split('=')[1] || ''
+      );
+
+      // 3. Crear el FormData
       const form = new FormData();
       form.append('name', formData.name);
       form.append('last_name', formData.last_name);
       form.append('address', formData.address);
-  
-      if (imagen) {
-        form.append('profile_image', imagen);  // Si existe, se adjunta
-      }
-  
-      // Enviamos el formulario al backend
-      const resp = await axios.post('http://localhost:8000/actualizar-usuario', form, {
-        withCredentials: true
+      if (imagen) form.append('profile_image', imagen);
+
+      // 4. Enviar la petición con el token CSRF en los headers
+      const resp = await axios.post('http://localhost:8000/usuario/actualizar', form, {
+        withCredentials: true,
+        headers: {
+          'X-XSRF-TOKEN': csrfToken,
+        }
       });
-  
+
       const data = resp.data;
-  
+
       if (resp.status !== 200) {
         setMensaje({ texto: `❌ ${data.message}`, tipo: 'danger' });
         return;
       }
-  
-      // Actualizamos el usuario en React con los nuevos datos
+
       const updated = {
         ...usuario,
         ...formData,
-        profile_image: data.profile_image, // <-- Aquí ya viene la URL correcta
+        profile_image: data.profile_image,
       };
-  
-      // Actualizamos el estado del usuario en React
       setUsuario(updated);
-  
-      // Guardamos en localStorage para persistencia
       localStorage.setItem('usuario', JSON.stringify(updated));
-  
-      // Mostramos un mensaje de éxito
-      setMensaje({
-        texto: '✅ Perfil actualizado correctamente.',
-        tipo: 'success',
-      });
-  
+      setMensaje({ texto: '✅ Perfil actualizado correctamente.', tipo: 'success' });
+      setTimeout(() => setMensaje({ texto: '', tipo: '' }), 4000);
+
     } catch (error) {
       console.error(error);
       setMensaje({ texto: '❌ Error de conexión.', tipo: 'danger' });
     }
   };
-  
+
 
   // Recuperar contraseña
   const handleEnviarRecuperacion = async e => {
@@ -236,12 +241,12 @@ const PanelUsuario = () => {
   const renderPerfil = () => (
     <div className="w-100" style={{ maxWidth: 500 }}>
       <div className="mb-3 text-center">
-      <img 
-  src={usuario.profile_image} 
-  alt="Perfil" 
-  style={{ width: 120, borderRadius: '50%' }} 
-  onError={(e) => (e.target.src = '/img/usuario/principal.png')} 
-/>
+        <img
+          src={usuario.profile_image}
+          alt="Perfil"
+          style={{ width: 120, borderRadius: '50%' }}
+          onError={(e) => (e.target.src = '/img/usuario/principal.png')}
+        />
 
       </div>
       {['name', 'last_name', 'address', 'email'].map((f) => (
@@ -250,10 +255,10 @@ const PanelUsuario = () => {
             {f === 'name'
               ? 'Nombre'
               : f === 'last_name'
-              ? 'Apellidos'
-              : f === 'address'
-              ? 'Dirección'
-              : 'Correo electrónico'}
+                ? 'Apellidos'
+                : f === 'address'
+                  ? 'Dirección'
+                  : 'Correo electrónico'}
           </label>
           <input
             className="form-control text-center"
@@ -264,8 +269,8 @@ const PanelUsuario = () => {
       ))}
     </div>
   );
-  
-  
+
+
 
   const renderModificarDatos = () => (
     <div className="w-100" style={{ maxWidth: 500 }}>
@@ -279,8 +284,8 @@ const PanelUsuario = () => {
             {f === 'name'
               ? 'Nombre'
               : f === 'last_name'
-              ? 'Apellidos'
-              : 'Dirección'}
+                ? 'Apellidos'
+                : 'Dirección'}
           </label>
           <input
             className="form-control text-center"
@@ -348,7 +353,7 @@ const PanelUsuario = () => {
           <h1 className="display-6 text-center mb-4">Panel del Usuario</h1>
           {mensaje.texto && (
             <div
-              className={`alert alert-${mensaje.tipo} custom-alert text-center`}                                                                            
+              className={`alert alert-${mensaje.tipo} custom-alert text-center`}
               style={{
                 maxWidth: 500,
                 margin: '0 auto 1.5rem',

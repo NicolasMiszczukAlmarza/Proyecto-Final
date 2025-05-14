@@ -139,9 +139,28 @@ const ResetPassword = () => {
                 placeholder="Repite tu nueva contraseña"
               />
             </div>
-            <button className="btn btn-primary w-100" type="submit" disabled={loading}>
-              {loading ? 'Cambiando...' : 'Cambiar contraseña'}
+            <button
+              type="submit"
+              className="btn w-100"
+              disabled={loading}
+              style={{
+                backgroundColor: '#6f42c1',   // Morado estilo Bootstrap
+                color: '#fff',
+                border: 'none',
+                borderRadius: '14px',
+                padding: '0.6rem',
+                fontWeight: '500',
+                fontSize: '1.1rem',
+                transition: 'background-color 0.3s ease',
+                textAlign: 'center',
+                display: 'block'
+              }}
+            >
+              <span className="w-100 d-block text-center">
+                {loading ? 'Cambiando...' : 'Cambiar contraseña'}
+              </span>
             </button>
+
           </form>
           <div className="text-center mt-3">
             <button

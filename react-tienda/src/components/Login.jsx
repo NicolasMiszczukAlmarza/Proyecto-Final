@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+
+
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -100,7 +102,19 @@ const Login = () => {
                 required
               />
             </div>
-            <button type="submit" className="btn btn-primary w-100">Iniciar Sesión</button>
+            <button
+              type="submit"
+              className="btn w-100"
+              style={{
+                backgroundColor: '#6f42c1', // Bootstrap's `$purple`
+                color: '#fff',
+                border: 'none'
+              }}
+            >
+              <span className="w-100 text-center d-block">Iniciar Sesión</span>
+            </button>
+
+
           </form>
 
           <div className="text-center mt-3">

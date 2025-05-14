@@ -76,22 +76,22 @@ const Formulario = () => {
 
         {/* Columna de la imagen */}
         <div className="col-md-6 d-flex align-items-center justify-content-center">
-  <img
-    src="/img/logo/logo.PNG"
-    alt="Logo"
-    className="img-fluid rounded shadow"
-    style={{
-      maxWidth: '90%',
-      maxHeight: '300px',
-      objectFit: 'contain',
-      cursor: 'pointer'
-    }}
-    onClick={() => navigate("/")}
-    onError={(e) => {
-      e.target.src = "/img/logo/nico.PNG";
-    }}
-  />
-</div>
+          <img
+            src="/img/logo/logo.PNG"
+            alt="Logo"
+            className="img-fluid rounded shadow"
+            style={{
+              maxWidth: '90%',
+              maxHeight: '300px',
+              objectFit: 'contain',
+              cursor: 'pointer'
+            }}
+            onClick={() => navigate("/")}
+            onError={(e) => {
+              e.target.src = "/img/logo/nico.PNG";
+            }}
+          />
+        </div>
 
 
 
@@ -167,9 +167,29 @@ const Formulario = () => {
                 minLength={8}
               />
             </div>
-            <button type="submit" className="btn btn-primary w-100" disabled={loading}>
-              {loading ? 'Registrando...' : 'Registrarse'}
+            <button
+              type="submit"
+              className="btn w-100"
+              disabled={loading}
+              style={{
+                backgroundColor: '#6f42c1',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '14px',
+                padding: '0.6rem',
+                fontWeight: '500',
+                fontSize: '1.1rem',
+                transition: 'background-color 0.3s ease',
+                textAlign: 'center',          // Centra el contenido
+                display: 'block'              // Asegura que se alinee bien
+              }}
+            >
+              <span className="w-100 d-block text-center">
+                {loading ? 'Registrando...' : 'Registrarse'}
+              </span>
             </button>
+
+
           </form>
         </div>
       </div>

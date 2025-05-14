@@ -1,64 +1,128 @@
-.panel-container {
-    display: flex;
-    min-height: 100vh;
-  }
-  
-  .panel-sidebar {
-    width: 250px;
-    background-color: #343a40;
-    color: white;
-    padding: 2rem 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    min-height: 100vh;
-  }
-  
-  .panel-sidebar button {
-    text-align: left;
-  }
-  
-  .panel-sidebar .btn-active {
-    background-color: #007bff;
-    color: white;
-    font-weight: bold;
-  }
-  
-  .panel-content {
-    flex: 1;
-    padding: 2rem;
-    background-color: #f8f9fa;
-  }
-  
-  .admin-header {
-    background-color: #343a40; /* Negro oscuro */
-    color: white;
-    padding: 1rem 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    text-align: center;
-  }
-  
+/* -------------------------------------------------------------
+ * 1. Variables – Professional blue palette
+ * ----------------------------------------------------------- */
+:root {
+  --c-primary:           #2563eb;  /* Indigo‑600 */
+  --c-primary-hover:     #1e40af;  /* Indigo‑800 */
+  --c-primary-light:     #93c5fd;  /* Blue‑300 */
 
-  .modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1050;
-  }
-  
-  .modal-confirm {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    max-width: 400px;
-    width: 100%;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-  }
-  
+  --c-bg:                #f1f5f9;  /* Slate‑100 */
+
+  --c-sidebar-start:     #0f172a;  /* Navy‑900 */
+  --c-sidebar-end:       #1e3a8a;  /* Indigo‑900 */
+  --c-sidebar-active:    #3b82f6;  /* Blue‑500 */
+
+  --c-text-light:        #ffffff;
+  --c-text-muted:        #cbd5e1;
+
+  --radius:              14px;
+  --shadow:              0 10px 25px rgba(15, 23, 42, 0.15);
+  --transition:          all 0.25s ease;
+  --font:                'Inter','Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+}
+
+/* -------------------------------------------------------------
+ * 2. Reset & helpers
+ * ----------------------------------------------------------- */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--font);color:#0f172a;background:var(--c-bg)}
+a{color:var(--c-primary);text-decoration:none;transition:var(--transition)}
+a:hover{color:var(--c-primary-hover)}
+
+/* Buttons ---------------------------------------------------- */
+.btn{
+  display:inline-flex;align-items:center;gap:.35rem;
+  border-radius:var(--radius);font-weight:500;transition:var(--transition);
+  border:none;cursor:pointer;
+}
+.btn-primary{background:var(--c-primary);color:#fff}
+.btn-primary:hover{background:var(--c-primary-hover)}
+.btn-outline-light{
+  background:transparent;border:1px solid var(--c-text-muted);color:var(--c-text-muted)
+}
+.btn-outline-light:hover{background:var(--c-primary-light);color:#fff;border-color:var(--c-primary-light)}
+.btn-warning{background:#facc15;color:#1e1e1e}
+.btn-danger{background:#dc2626;color:#fff}
+.btn-danger:hover{background:#b91c1c}
+
+/* -------------------------------------------------------------
+ * 3. Layout
+ * ----------------------------------------------------------- */
+.panel-container{display:flex;height:100vh;overflow:hidden}
+
+/* --- Sidebar fijo --- */
+.panel-sidebar{
+  position:fixed;left:0;top:0;height:100vh;width:260px;
+  padding:2rem 1.25rem 3rem;
+  background:linear-gradient(180deg,var(--c-sidebar-start)0%,var(--c-sidebar-end)100%);
+  color:var(--c-text-light);display:flex;flex-direction:column;gap:1rem;
+  box-shadow:var(--shadow);z-index:10;
+}
+.panel-sidebar h5{font-size:1.35rem;font-weight:600;text-align:center;margin-bottom:1.25rem}
+.panel-sidebar button{
+  width:100%;padding:.8rem 1rem;background:transparent;border:none;
+  color:var(--c-text-muted);text-align:left;border-radius:var(--radius);transition:var(--transition)
+}
+.panel-sidebar button:hover{background:rgba(255,255,255,.07);color:#fff}
+.panel-sidebar .btn-active{background:var(--c-sidebar-active);color:#fff;font-weight:600}
+.panel-sidebar .btn-active:hover{background:var(--c-primary-hover)}
+
+/* --- Contenido desplazado --- */
+.panel-content{
+  margin-left:260px;          /* mismo ancho del sidebar */
+  width:calc(100% - 260px);
+  padding:2.5rem clamp(1rem,4vw,4rem);
+  overflow-y:auto;background:var(--c-bg);
+}
+.admin-header{
+  background:var(--c-primary);color:#fff;padding:1.25rem 1.5rem;
+  border-radius:var(--radius);box-shadow:var(--shadow);
+  font-size:1.5rem;font-weight:600;text-align:center;letter-spacing:.3px
+}
+
+/* -------------------------------------------------------------
+ * 4. Tables & lists
+ * ----------------------------------------------------------- */
+.table{
+  width:100%;border-collapse:collapse;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden
+}
+.table thead{background:var(--c-primary-light);color:#0f172a}
+.table th,.table td{padding:.85rem 1rem;vertical-align:middle}
+.table tbody tr:hover{background:rgba(59,130,246,.07)}
+
+.list-group-item{
+  border:none;border-radius:var(--radius)!important;margin-bottom:.5rem;box-shadow:var(--shadow)
+}
+
+/* -------------------------------------------------------------
+ * 5. Forms & inputs
+ * ----------------------------------------------------------- */
+.form-control,.form-select,textarea{
+  width:100%;border:1px solid #cbd5e1;border-radius:var(--radius);
+  padding:.55rem .75rem;font-size:1rem;transition:var(--transition)
+}
+.form-control:focus,.form-select:focus,textarea:focus{
+  border-color:var(--c-primary);box-shadow:0 0 0 2px rgba(37,99,235,.25);outline:none
+}
+
+/* -------------------------------------------------------------
+ * 6. Modals
+ * ----------------------------------------------------------- */
+.modal-backdrop{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.55);backdrop-filter:blur(2px);z-index:1050
+}
+@keyframes fade{0%{opacity:0;transform:scale(.95)}100%{opacity:1;transform:scale(1)}}
+.modal-confirm{
+  background:#fff;padding:2rem 2.5rem;border-radius:var(--radius);
+  width:100%;max-width:480px;box-shadow:var(--shadow);animation:fade .25s ease forwards
+}
+.modal-confirm.large{max-width:720px}
+
+/* -------------------------------------------------------------
+ * 7. Scrollbar
+ * ----------------------------------------------------------- */
+.panel-content::-webkit-scrollbar{width:8px}
+.panel-content::-webkit-scrollbar-track{background:transparent}
+.panel-content::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:50px}
+.panel-content::-webkit-scrollbar-thumb:hover{background:#94a3b8}
