@@ -85,4 +85,29 @@ class UsuarioController extends Controller
             'user'          => $user,
         ]);
     }
+
+
+
+
+
+    public function destroy(Request $request)
+{
+    $user = $request->user();
+
+    if (!$user) {
+        return response()->json(['message' => 'No autenticado.'], 401);
+    }
+
+    // Eliminar imagen de perfil si es personalizada
+    if ($user->profile_image &&
+        $user->profile_image !== 'img/usuario/principal.png' &&
+        file_exists(public_path($user->profile_image))) {
+        @unlink(public_path($user->profile_image));
+    }
+
+    $user->delete();
+
+    return response()->json(['message' => 'Cuenta eliminada correctamente.']);
+}
+
 }

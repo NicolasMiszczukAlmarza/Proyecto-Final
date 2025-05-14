@@ -98,6 +98,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Usuario
     Route::get('/usuario', [UsuarioController::class, 'show']);
     Route::post('/usuario/actualizar', [UsuarioController::class, 'update']);
+    Route::delete('/usuario/eliminar', [UsuarioController::class, 'destroy']);
+
 
     // Productos
     Route::get('/productos', fn () => Producto::all());

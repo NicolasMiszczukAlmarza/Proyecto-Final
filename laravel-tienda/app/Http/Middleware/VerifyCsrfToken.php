@@ -30,6 +30,8 @@ class VerifyCsrfToken extends Middleware
         'admin/convertir-admin',
         'admin/quitar-admin',
         'admin/eliminar',
+        'usuario/actualizar', // esto permite omitir CSRF si lo deseas
+        'usuario/eliminar',
     ];
     
     
