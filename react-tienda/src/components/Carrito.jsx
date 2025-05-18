@@ -161,12 +161,12 @@ const Carrito = () => {
               }}
             />
 
-<button
-  className="btn btn-danger btn-sm btn-cerrar-sesion"
-  onClick={handleCerrarSesion}
->
-  Cerrar sesión
-</button>
+            <button
+              className="btn btn-danger btn-sm btn-cerrar-sesion"
+              onClick={handleCerrarSesion}
+            >
+              Cerrar sesión
+            </button>
 
 
 
@@ -179,9 +179,8 @@ const Carrito = () => {
             {categorias.map((c) => (
               <span
                 key={c.id}
-                className={`categoria ${
-                  categoriaSeleccionada === c.nombre ? "selected" : ""
-                }`}
+                className={`categoria ${categoriaSeleccionada === c.nombre ? "selected" : ""
+                  }`}
                 onClick={() => handleCategoriaClick(c.nombre)}
               >
                 {c.nombre}
@@ -236,47 +235,45 @@ const Carrito = () => {
                 <h5 className="modal-title">Selecciona la cantidad</h5>
                 <button
                   type="button"
-                  className="btn-close"
+                  className="btn-close-round"
                   onClick={() => setShowModal(false)}
-                />
+                >
+                  ×
+                </button>
+
+
               </div>
               <div className="modal-body text-center">
                 <img
                   src={getImagenUrl(productoSeleccionado.img)}
                   alt={productoSeleccionado.nombre}
-                  className="img-fluid rounded border"
+                  className="img-fluid rounded border mb-3"
                   style={{ width: 100, height: 100, objectFit: "cover" }}
                   onError={(e) => {
                     e.currentTarget.onerror = null;
                     e.currentTarget.src = "/img/no-image.png";
                   }}
                 />
-                <div className="quantity-controls d-flex justify-content-center align-items-center mt-3 gap-3">
-                  <button
-                    className="btn btn-secondary rounded-circle"
-                    style={{ width: 45, height: 45 }}
-                    onClick={() => setCantidad((c) => Math.max(1, c - 1))}
-                  >
-                    −
-                  </button>
-                  <input
-                    type="number"
-                    value={cantidad}
-                    min={1}
-                    max={5}
-                    readOnly
-                    className="form-control text-center fw-bold"
-                    style={{ width: 60, fontSize: "1.1rem" }}
-                  />
-                  <button
-                    className="btn btn-success rounded-circle"
-                    style={{ width: 45, height: 45 }}
-                    onClick={() => setCantidad((c) => Math.min(5, c + 1))}
-                  >
-                    +
-                  </button>
-                </div>
+
+                <div className="quantity-wrapper">
+  <button
+    className="cantidad-icono resta"
+    onClick={() => setCantidad((c) => Math.max(1, c - 1))}
+  >
+    −
+  </button>
+  <span className="cantidad-numero">{cantidad}</span>
+  <button
+    className="cantidad-icono suma"
+    onClick={() => setCantidad((c) => Math.min(5, c + 1))}
+  >
+    +
+  </button>
+</div>
+
+
               </div>
+
               <div className="modal-footer">
                 <button className="btn btn-primary w-100" onClick={agregarAlCarrito}>
                   Agregar al carrito

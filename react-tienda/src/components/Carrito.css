@@ -298,3 +298,70 @@ body {
   outline:none;
   box-shadow:0 0 5px rgba(0,0,0,.2);
 }
+
+/* ---------- BOTÓN CIERRE REDONDO DE MODAL ---------- */
+/* ---------- BOTÓN CIERRE REDONDO PEQUEÑO ---------- */
+.btn-close-round {
+  width: 22px;
+  height: 22px;
+  font-size: 1rem;
+  line-height: 1;
+  border-radius: 50%;
+  background-color: transparent;
+  color: #666;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  padding: 0;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-close-round:hover {
+  color: #dc3545;
+  transform: scale(1.1);
+}
+
+/* ---------- NUEVO CONTROL DE CANTIDAD ---------- */
+.quantity-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.cantidad-icono {
+  width: 36px;
+  height: 36px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.cantidad-icono:hover {
+  transform: scale(1.1);
+}
+
+.cantidad-icono.resta {
+  background-color: #dc3545;
+}
+
+.cantidad-icono.suma {
+  background-color: #28a745;
+}
+
+.cantidad-numero {
+  font-size: 1.3rem;
+  font-weight: bold;
+  width: 40px;
+  text-align: center;
+}

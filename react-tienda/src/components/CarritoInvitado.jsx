@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { categorias } from "../data/categorias";
 import { productos } from "../data/productos";
@@ -9,116 +9,98 @@ const CarritoInvitado = () => {
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null);
   const [busqueda, setBusqueda] = useState("");
 
-  const categoriasFiltradas = categorias.filter(c => c.nombre !== "Mas Vendida");
+  const categoriasMenuList = useMemo(
+    () => categorias.filter((c) => c.nombre.toLowerCase() !== "mas vendida"),
+    []
+  );
 
-  const productosFiltrados = productos.filter(producto => {
-    const categoria = categorias.find(cat => cat.id === producto.id_categoria);
-    const coincideCategoria = categoriaSeleccionada
-      ? categoria?.nombre === categoriaSeleccionada
-      : true;
-    const coincideBusqueda = busqueda
-      ? producto.nombre.toLowerCase().includes(busqueda.toLowerCase())
-      : true;
-    return coincideCategoria && coincideBusqueda;
-  });
-
-  const handleCerrarSesion = async () => {
-    try {
-      const response = await fetch("http://localhost:8000/logout", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-      });
-
-      if (response.ok) {
-        localStorage.removeItem("userEmail");
-        navigate("/login");
-      } else {
-        console.error("Error al cerrar sesión.");
-      }
-    } catch (error) {
-      console.error("Error al cerrar sesión:", error);
-    }
-  };
-
-  const handleCategoriaClick = (nombreCategoria) => {
-    setCategoriaSeleccionada(prev => prev === nombreCategoria ? null : nombreCategoria);
-    setBusqueda("");
-  };
-
-  const handleBusquedaChange = (e) => {
-    setBusqueda(e.target.value);
-    setCategoriaSeleccionada(null);
-  };
+  const productosFiltrados = useMemo(() => {
+    return productos.filter((p) => {
+      const cat = categorias.find((c) => c.id === p.id_categoria);
+      const okCat = categoriaSeleccionada
+        ? cat?.nombre === categoriaSeleccionada
+        : true;
+      const okSearch = busqueda
+        ? p.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+          p.descripcion.toLowerCase().includes(busqueda.toLowerCase())
+        : true;
+      return okCat && okSearch;
+    });
+  }, [categoriaSeleccionada, busqueda]);
 
   return (
     <>
-      {/* Header */}
       <header className="header">
         <div className="header-inner">
           <div className="header-left">
-  <img
-    src="/img/logo/logo.jpg"
-    alt="Logo"
-    className="logo"
-    onError={(e) => {
-      e.target.src = "/img/logo/nico.PNG"; // fallback si no carga
-    }}
-  />
-</div>
-
+            <img
+              src="/img/logo/logo.jpg"
+              alt="Logo"
+              className="logo"
+              onClick={() => navigate("/")}
+              onError={(e) => (e.currentTarget.src = "/img/logo/nico.PNG")}
+            />
+          </div>
           <div className="header-center">
             <input
               type="text"
               className="search-bar"
               placeholder="Buscar productos..."
               value={busqueda}
-              onChange={handleBusquedaChange}
+              onChange={(e) => setBusqueda(e.target.value)}
             />
           </div>
           <div className="header-right">
-            <button className="btn-danger" onClick={handleCerrarSesion}>
+            <button className="btn-login" onClick={() => navigate("/login")}>
               Iniciar sesión
             </button>
           </div>
         </div>
       </header>
 
-      <main className="productos-container">
-        {/* Categorías */}
-        <nav className="categorias-menu">
-          <div className="categorias-container">
-            {categoriasFiltradas.map(categoria => (
-              <span
-                key={categoria.id}
-                className={`categoria ${categoriaSeleccionada === categoria.nombre ? "selected" : ""}`}
-                onClick={() => handleCategoriaClick(categoria.nombre)}
-              >
-                {categoria.nombre}
-              </span>
-            ))}
-          </div>
-        </nav>
+      <nav className="categorias-menu">
+        <div className="categorias-container">
+          {categoriasMenuList.map((c) => (
+            <span
+              key={c.id}
+              className={`categoria ${
+                c.nombre === categoriaSeleccionada ? "selected" : ""
+              }`}
+              onClick={() =>
+                setCategoriaSeleccionada((prev) =>
+                  prev === c.nombre ? null : c.nombre
+                )
+              }
+            >
+              {c.nombre}
+            </span>
+          ))}
+        </div>
+      </nav>
 
-        {/* Título */}
+      <main className="productos-container">
         <h3 className="productos-titulo">
           {busqueda
             ? "Resultados de búsqueda"
             : categoriaSeleccionada
-              ? `Productos de ${categoriaSeleccionada}`
-              : "Todos los productos"}
+            ? `Productos de ${categoriaSeleccionada}`
+            : "Todos los productos"}
         </h3>
 
-        {/* Lista de productos */}
         <div className="productos-lista">
-          {productosFiltrados.length > 0 ? (
-            productosFiltrados.map(producto => (
-              <div key={producto.id} className="producto-card">
-                <img src={producto.img} alt={producto.nombre} className="card-img-top" />
+          {productosFiltrados.length ? (
+            productosFiltrados.map((p) => (
+              <div key={p.id} className="producto-card">
+                <img
+                  src={p.img}
+                  alt={p.nombre}
+                  className="card-img-top"
+                  onError={(e) => (e.currentTarget.src = "/img/no-image.png")}
+                />
                 <div className="card-body">
-                  <h5 className="card-title">{producto.nombre}</h5>
-                  <p className="card-text">{producto.descripcion}</p>
-                  <h6 className="card-price">{producto.precio}€</h6>
+                  <h5 className="card-title">{p.nombre}</h5>
+                  <p className="card-text">{p.descripcion}</p>
+                  <h6 className="card-price">{p.precio}€</h6>
                 </div>
               </div>
             ))
