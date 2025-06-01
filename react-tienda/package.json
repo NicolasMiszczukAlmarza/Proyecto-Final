@@ -1,8 +1,12 @@
 {
+  "name": "react-tienda",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
-    "start": "serve -s dist -l 0.0.0.0:$PORT"
+    "start": "serve -s dist -l http://0.0.0.0:$PORT"
   },
   "dependencies": {
+    "react-tienda": "file:",
     "serve": "^14.2.4"
   }
 }
